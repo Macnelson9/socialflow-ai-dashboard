@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import ipfsService, { IPFSService } from './IPFSService'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import ipfsService from './IPFSService'
 
 beforeEach(() => {
   vi.restoreAllMocks()
@@ -71,5 +71,20 @@ describe('IPFSService', () => {
     await ipfsService.unpinFile(localId)
     const pins2 = await (ipfsService as any).getPinnedFiles()
     expect(pins2.local.some((p: any) => p.cid === localId && p.pinned === false)).toBe(true)
+  })
+
+  it('uploadJSON throws on invalid metadata', async () => {
+    await expect(() => (ipfsService as any).uploadJSON(null)).rejects.toThrow()
+  })
+
+  it('uploadFile uses chunked path for large files', async () => {
+    const fakeCid = 'bafy-chunked'
+    globalThis.fetch = vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ cid: fakeCid }) } as any)) as any
+    // create a ~11MB blob to trigger chunked upload (>10MB)
+    const big = new Uint8Array(11 * 1024 * 1024)
+    const file = new File([big], 'big.bin', { type: 'application/octet-stream' })
+    const res = await ipfsService.uploadFile(file)
+    expect(res.cid).toBe(fakeCid)
+    expect(res.size).toBe(file.size)
   })
 })

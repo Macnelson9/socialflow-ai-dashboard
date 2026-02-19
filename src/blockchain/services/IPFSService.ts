@@ -162,7 +162,7 @@ export class IPFSService {
     return this.uploadFileSimple(file, onProgress)
   }
 
-  private async uploadFileSimple(file: File, onProgress?: (a: number, b: number) => void) {
+  private async uploadFileSimple(file: File, _onProgress?: (a: number, b: number) => void) {
     const info = this.getProviderInfo()
     if (this.config.provider === 'web3') {
       const form = new FormData()
@@ -270,7 +270,7 @@ export class IPFSService {
       while (index < files.length) {
         const i = index++
         try {
-          const res = await this.uploadFile(files[i], (u, t) => {
+          const res = await this.uploadFile(files[i], (_u, _t) => {
             // per-file progress ignored here
           })
           results[i] = res
@@ -395,7 +395,7 @@ export class IPFSService {
   }
 
   async unpinFile(cid: string) {
-    const info = this.getProviderInfo()
+    
     if (this.config.provider === 'pinata') {
       const url = `https://api.pinata.cloud/pinning/unpin/${cid}`
       const headers: any = {}
