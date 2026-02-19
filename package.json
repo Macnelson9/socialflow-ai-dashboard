@@ -8,6 +8,8 @@
     "test": "vitest",
     "build": "tsc && npx vite build",
     "preview": "npx vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
     "electron:dev": "concurrently \"npm run dev\" \"npx wait-on tcp:5173 && npx electron .\"",
     "electron:build": "npx vite build && electron-builder",
     "test": "jest",
@@ -19,6 +21,8 @@
   "license": "ISC",
   "dependencies": {
     "@google/genai": "latest",
+    "@stellar/stellar-sdk": "^14.5.0",
+    "axios": "^1.13.5",
     "lucide-react": "^0.300.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
