@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Card } from './ui/Card';
-import { Conversation, Platform, ViewProps } from '../types';
+import { Conversation, ViewProps } from '../types';
 import { generateReply } from '../services/geminiService';
 import { SiInstagram, SiFacebook } from 'react-icons/si';
 import { FaXTwitter } from 'react-icons/fa6';
