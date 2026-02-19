@@ -85,7 +85,7 @@ export const Analytics: React.FC<ViewProps> = () => {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {ageData.map((_entry, index) => (
+                  {ageData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

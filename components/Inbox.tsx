@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+// Card import removed (unused)
 import { Conversation, ViewProps } from '../types';
 import { generateReply } from '../services/geminiService';
 import { SiInstagram, SiFacebook } from 'react-icons/si';
