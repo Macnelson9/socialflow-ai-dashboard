@@ -1,11 +1,13 @@
 export enum View {
-  DASHBOARD = 'DASHBOARD',
-  ANALYTICS = 'ANALYTICS',
-  CALENDAR = 'CALENDAR',
-  CREATE_POST = 'CREATE_POST',
-  MEDIA_LIBRARY = 'MEDIA_LIBRARY',
-  INBOX = 'INBOX',
-  SETTINGS = 'SETTINGS'
+  DASHBOARD = "DASHBOARD",
+  ANALYTICS = "ANALYTICS",
+  CALENDAR = "CALENDAR",
+  CREATE_POST = "CREATE_POST",
+  MEDIA_LIBRARY = "MEDIA_LIBRARY",
+  INBOX = "INBOX",
+  SETTINGS = "SETTINGS",
+  PORTFOLIO = "PORTFOLIO",
+  TRANSACTION_HISTORY = "TRANSACTION_HISTORY",
 }
 
 export interface NavItem {
@@ -20,11 +22,11 @@ export interface ViewProps {
 
 export interface Post {
   id: string;
-  platform: 'instagram' | 'tiktok' | 'facebook' | 'youtube' | 'linkedin' | 'x';
+  platform: "instagram" | "tiktok" | "facebook" | "youtube" | "linkedin" | "x";
   content: string;
   image?: string;
   date: Date;
-  status: 'scheduled' | 'published' | 'draft';
+  status: "scheduled" | "published" | "draft";
   stats?: {
     likes: number;
     views: number;
@@ -42,33 +44,22 @@ export interface Message {
 
 export interface Conversation {
   id: string;
-  platform: 'instagram' | 'facebook' | 'x';
+  platform: "instagram" | "facebook" | "x";
   user: string;
   avatar: string;
   lastMessage: string;
   unread: boolean;
-  status: 'new' | 'pending' | 'resolved';
+  status: "new" | "pending" | "resolved";
   messages: Message[];
 }
 
 export enum Platform {
-  INSTAGRAM = 'instagram',
-  TIKTOK = 'tiktok',
-  FACEBOOK = 'facebook',
-  YOUTUBE = 'youtube',
-  LINKEDIN = 'linkedin',
-  X = 'x'
-}
-
-export enum View {
-  DASHBOARD = 'DASHBOARD',
-  ANALYTICS = 'ANALYTICS',
-  CALENDAR = 'CALENDAR',
-  CREATE_POST = 'CREATE_POST',
-  MEDIA_LIBRARY = 'MEDIA_LIBRARY',
-  INBOX = 'INBOX',
-  SETTINGS = 'SETTINGS',
-  PORTFOLIO = 'PORTFOLIO'
+  INSTAGRAM = "instagram",
+  TIKTOK = "tiktok",
+  FACEBOOK = "facebook",
+  YOUTUBE = "youtube",
+  LINKEDIN = "linkedin",
+  X = "x",
 }
 
 export interface BlockchainAsset {
@@ -87,6 +78,6 @@ export interface PortfolioSummary {
   lastUpdated: Date;
 }
 
-export type AssetFilter = 'all' | 'tokens' | 'nfts' | 'zero_balance';
-export type AssetSort = 'name' | 'balance' | 'value';
-export type SortDirection = 'asc' | 'desc';
+export type AssetFilter = "all" | "tokens" | "nfts" | "zero_balance";
+export type AssetSort = "name" | "balance" | "value";
+export type SortDirection = "asc" | "desc";
