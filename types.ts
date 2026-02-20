@@ -59,3 +59,37 @@ export enum Platform {
   LINKEDIN = 'linkedin',
   X = 'x'
 }
+
+// Blockchain/Wallet Types
+export interface WalletProvider {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  installed: boolean;
+  installUrl?: string;
+}
+
+export interface TokenBalance {
+  code: string;
+  issuer: string;
+  balance: string;
+}
+
+export interface WalletState {
+  isConnected: boolean;
+  publicKey: string | null;
+  provider: string | null;
+  network: 'mainnet' | 'testnet';
+  xlmBalance: string | null;
+  tokenBalances: TokenBalance[];
+  isLoading: boolean;
+  error: string | null;
+}
+
+export enum WalletConnectionStatus {
+  DISCONNECTED = 'DISCONNECTED',
+  CONNECTING = 'CONNECTING',
+  CONNECTED = 'CONNECTED',
+  ERROR = 'ERROR'
+}
