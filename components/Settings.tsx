@@ -3,7 +3,7 @@ import { ViewProps } from '../types';
 import { identityService, VerificationStatus } from '../services/identityService';
 import { VerificationBadge } from './VerificationBadge';
 
-export const Settings: React.FC<ViewProps> = ({ onNavigate }) => {
+export const Settings: React.FC<ViewProps> = () => {
   // State for toggles (all enabled by default)
   const [darkMode, setDarkMode] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
