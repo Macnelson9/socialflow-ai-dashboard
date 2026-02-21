@@ -59,3 +59,64 @@ export enum Platform {
   LINKEDIN = 'linkedin',
   X = 'x'
 }
+
+// Payment & Blockchain Types
+export interface Asset {
+  id: string;
+  symbol: string;
+  name: string;
+  balance: number;
+  decimals: number;
+  icon?: string;
+}
+
+export interface PaymentFormData {
+  recipientAddress: string;
+  amount: string;
+  assetId: string;
+  memo?: string;
+}
+
+export interface PaymentSummary {
+  recipientAddress: string;
+  amount: string;
+  asset: Asset;
+  estimatedGasFee: string;
+  totalCost: string;
+  memo?: string;
+}
+
+export interface TransactionStatus {
+  id: string;
+  hash: string;
+  status: 'pending' | 'success' | 'error';
+  timestamp: Date;
+  amount: string;
+  asset: Asset;
+  recipientAddress: string;
+  errorMessage?: string;
+}
+
+export interface PaymentRequest {
+  id: string;
+  recipientAddress: string;
+  amount: string;
+  asset: Asset;
+  memo?: string;
+  qrCode: string;
+  shareableLink: string;
+  createdAt: Date;
+}
+
+export interface RecurringPayment {
+  id: string;
+  recipientAddress: string;
+  amount: string;
+  asset: Asset;
+  frequency: 'daily' | 'weekly' | 'monthly';
+  startDate: Date;
+  endDate?: Date;
+  nextPaymentDate: Date;
+  isActive: boolean;
+  memo?: string;
+}
