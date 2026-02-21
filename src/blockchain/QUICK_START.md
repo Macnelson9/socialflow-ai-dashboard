@@ -1,263 +1,193 @@
-# Soroban Contract Bridge - Quick Start
-
-Get up and running with Soroban smart contracts in 5 minutes.
-
-## Prerequisites
-
-1. Install a Stellar wallet:
-   - [Freighter](https://www.freighter.app/) (Chrome/Firefox extension)
-   - [Albedo](https://albedo.link/) (Web-based)
-
-2. Configure wallet for Testnet
-
-3. Get test XLM from [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test)
+# Wallet Service Quick Start
 
 ## Installation
 
-Dependencies are already installed. Just import and use:
-
-```typescript
-import { 
-  sorobanService,
-  walletService,
-  useSorobanContract 
-} from './blockchain';
+```bash
+npm install
 ```
 
-## 3 Ways to Use
+## Basic Usage
 
-### 1. Direct Service Usage (Vanilla JS/TS)
+### 1. Import
 
 ```typescript
-import { sorobanService, walletService, ContractCallType } from './blockchain';
-import { addressToScVal, u64ToScVal } from './blockchain';
-
-// Connect wallet
-const wallet = await walletService.autoConnect();
-
-// Read contract (no signature)
-const balance = await sorobanService.invoke(
-  {
-    contractId: 'CCONTRACT_ID',
-    method: 'balance',
-    args: [addressToScVal(wallet.publicKey)],
-  },
-  wallet.publicKey,
-  ContractCallType.READ_ONLY
-);
-
-// Write contract (requires signature)
-const signTx = async (xdr: string) => 
-  await walletService.signTransaction(xdr, 'testnet');
-
-const result = await sorobanService.invoke(
-  {
-    contractId: 'CCONTRACT_ID',
-    method: 'transfer',
-    args: [
-      addressToScVal(wallet.publicKey),
-      addressToScVal('GRECIPIENT'),
-      u64ToScVal(1000000n),
-    ],
-  },
-  wallet.publicKey,
-  ContractCallType.STATE_CHANGING,
-  signTx
-);
-
-console.log('TX Hash:', result.transactionHash);
+import { walletService } from './src/blockchain';
 ```
 
-### 2. React Hook (Recommended)
+### 2. Connect Wallet
 
 ```typescript
-import { useSorobanContract } from './blockchain/hooks/useSorobanContract';
-import { addressToScVal, u64ToScVal } from './blockchain';
+// Get available wallets
+const providers = walletService.getAvailableProviders();
 
-function TokenTransfer() {
-  const {
-    wallet,
-    isLoading,
-    error,
-    connectWallet,
-    readContract,
-    writeContract,
-  } = useSorobanContract('CCONTRACT_ID', 'TESTNET');
+// Connect to Freighter
+const connection = await walletService.connectWallet('Freighter', 'TESTNET');
+console.log(connection.publicKey);
+```
 
-  const handleTransfer = async () => {
-    const result = await writeContract('transfer', [
-      addressToScVal(wallet!.publicKey),
-      addressToScVal('GRECIPIENT'),
-      u64ToScVal(1000000n),
-    ]);
-    
-    alert(`Success! TX: ${result.transactionHash}`);
+### 3. Sign Transaction
+
+```typescript
+const result = await walletService.signTransaction(transactionXDR);
+console.log(result.signedXDR);
+```
+
+### 4. Disconnect
+
+```typescript
+await walletService.disconnectWallet();
+```
+
+## React Hook Example
+
+```typescript
+import { useState, useEffect } from 'react';
+import { walletService } from './src/blockchain';
+
+export function useWallet() {
+  const [connection, setConnection] = useState(null);
+
+  useEffect(() => {
+    walletService.loadSession().then(restored => {
+      if (restored) {
+        setConnection(walletService.getActiveConnection());
+      }
+    });
+  }, []);
+
+  const connect = async (provider: string) => {
+    const conn = await walletService.connectWallet(provider, 'TESTNET');
+    setConnection(conn);
   };
 
-  return (
-    <div>
-      {!wallet ? (
-        <button onClick={connectWallet}>Connect Wallet</button>
-      ) : (
-        <button onClick={handleTransfer} disabled={isLoading}>
-          Transfer
-        </button>
-      )}
-      {error && <p>Error: {error}</p>}
-    </div>
-  );
+  const disconnect = async () => {
+    await walletService.disconnectWallet();
+    setConnection(null);
+  };
+
+  return { connection, connect, disconnect };
 }
-```
-
-### 3. Demo Component
-
-```typescript
-import { SorobanDemo } from './blockchain/components/SorobanDemo';
-
-function App() {
-  return <SorobanDemo />;
-}
-```
-
-## Common Operations
-
-### Read Balance
-
-```typescript
-const result = await readContract('balance', [
-  addressToScVal(userAddress)
-]);
-const balance = fromScVal(result);
-```
-
-### Transfer Tokens
-
-```typescript
-const result = await writeContract('transfer', [
-  addressToScVal(fromAddress),
-  addressToScVal(toAddress),
-  u64ToScVal(amount),
-]);
-```
-
-### Get Contract Events
-
-```typescript
-const { getEvents } = useSorobanContract('CONTRACT_ID');
-const events = await getEvents();
-```
-
-### Simulate Before Execution
-
-```typescript
-const { simulateContract } = useSorobanContract('CONTRACT_ID');
-const simulation = await simulateContract('transfer', [
-  addressToScVal(from),
-  addressToScVal(to),
-  u64ToScVal(amount),
-]);
-
-console.log('Estimated cost:', simulation.minResourceFee);
-```
-
-## Helper Functions
-
-### Convert Values to ScVal
-
-```typescript
-import {
-  addressToScVal,  // Stellar address
-  u64ToScVal,      // Unsigned 64-bit integer
-  i64ToScVal,      // Signed 64-bit integer
-  u32ToScVal,      // Unsigned 32-bit integer
-  i32ToScVal,      // Signed 32-bit integer
-  symbolToScVal,   // Symbol (string)
-  boolToScVal,     // Boolean
-  bytesToScVal,    // Bytes (Buffer)
-  toScVal,         // Auto-detect type
-} from './blockchain';
-
-// Examples
-const args = [
-  addressToScVal('GADDRESS...'),
-  u64ToScVal(1000000n),
-  symbolToScVal('transfer'),
-  boolToScVal(true),
-];
-```
-
-### Convert ScVal to JavaScript
-
-```typescript
-import { fromScVal } from './blockchain';
-
-const balance = fromScVal(result.result);
-console.log('Balance:', balance);
 ```
 
 ## Error Handling
 
 ```typescript
-const result = await writeContract('transfer', args);
+import { WalletException, WalletError } from './src/blockchain';
 
-if (!result.success) {
-  switch (result.errorType) {
-    case 'OUT_OF_GAS':
-      console.error('Increase resource limits');
-      break;
-    case 'SIMULATION_FAILED':
-      console.error('Check arguments:', result.error);
-      break;
-    case 'TRANSACTION_FAILED':
-      console.error('Transaction failed:', result.error);
-      break;
+try {
+  await walletService.connectWallet('Freighter', 'TESTNET');
+} catch (error) {
+  if (error instanceof WalletException) {
+    switch (error.code) {
+      case WalletError.NOT_INSTALLED:
+        console.log('Please install the wallet extension');
+        break;
+      case WalletError.USER_REJECTED:
+        console.log('Connection was rejected');
+        break;
+      default:
+        console.error(error.message);
+    }
   }
 }
 ```
 
-## Network Configuration
+## Testing
+
+```bash
+# Run tests
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Coverage
+npm run test:coverage
+```
+
+## Supported Wallets
+
+- **Freighter**: Browser extension (Chrome, Firefox, Edge)
+- **Albedo**: Web-based, no installation required
+
+## Security Features
+
+- ✅ 30-minute auto-disconnect on inactivity
+- ✅ Encrypted session storage
+- ✅ Never stores private keys
+- ✅ Activity-based session refresh
+
+## API Reference
+
+### walletService.getAvailableProviders()
+Returns list of wallet providers with installation status.
+
+### walletService.connectWallet(providerName, network)
+Connects to specified wallet provider.
+- `providerName`: 'Freighter' | 'Albedo'
+- `network`: 'PUBLIC' | 'TESTNET'
+
+### walletService.disconnectWallet()
+Disconnects current wallet and clears session.
+
+### walletService.switchWallet(providerName, network?)
+Switches to different wallet provider.
+
+### walletService.getActiveConnection()
+Returns current wallet connection or null.
+
+### walletService.signTransaction(xdr)
+Signs transaction with connected wallet.
+
+### walletService.signAuthEntry(entry)
+Signs auth entry for Stellar authentication.
+
+### walletService.loadSession()
+Attempts to restore previous session.
+
+## Common Patterns
+
+### Auto-reconnect on App Start
 
 ```typescript
-import { SmartContractService } from './blockchain';
+useEffect(() => {
+  walletService.loadSession();
+}, []);
+```
 
-// Testnet (default)
-const testnet = new SmartContractService('TESTNET');
+### Check Connection Status
 
-// Mainnet
-const mainnet = new SmartContractService('MAINNET');
+```typescript
+const isConnected = walletService.getActiveConnection() !== null;
+```
 
-// Futurenet
-const futurenet = new SmartContractService('FUTURENET');
+### Handle Multiple Wallets
+
+```typescript
+const providers = walletService.getAvailableProviders();
+const installed = providers.filter(p => p.isInstalled);
 ```
 
 ## Troubleshooting
 
-### "Wallet not connected"
-→ Install Freighter or Albedo and unlock it
+**Wallet not connecting?**
+- Check if extension is installed
+- Verify network selection
+- Check browser console for errors
 
-### "Simulation failed"
-→ Check contract ID, method name, and argument types
+**Session not persisting?**
+- Ensure localStorage is enabled
+- Check for 30-minute timeout
+- Verify no browser privacy settings blocking storage
 
-### "Out of gas"
-→ Contract operation too expensive, optimize or increase limits
-
-### "Transaction timeout"
-→ Network congestion, retry after a few seconds
+**Tests failing?**
+- Run `npm install` to ensure dependencies
+- Clear Jest cache: `npx jest --clearCache`
+- Check Node.js version (16+ required)
 
 ## Next Steps
 
-1. Read the [full documentation](./README.md)
-2. Check [usage examples](./examples/contractUsage.ts)
-3. Review [testing guide](./TESTING.md)
-4. Try the [demo component](./components/SorobanDemo.tsx)
-
-## Support
-
-- [Stellar Soroban Docs](https://soroban.stellar.org/docs)
-- [Stellar SDK Docs](https://stellar.github.io/js-stellar-sdk/)
-- [Freighter Docs](https://docs.freighter.app/)
-- [Stellar Discord](https://discord.gg/stellar)
-
----
-
-**You're ready to build with Soroban!** 🚀
+1. Review full documentation in `README.md`
+2. Check example component in `examples/WalletConnectExample.tsx`
+3. Read implementation guide in `WALLET_IMPLEMENTATION_GUIDE.md`
+4. Explore test cases in `__tests__/WalletService.test.ts`
