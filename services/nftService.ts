@@ -55,6 +55,15 @@ export class NFTService {
   }
 
   /**
+   * Upload any data to IPFS (public method for general use)
+   */
+  public async uploadDataToIPFS(data: string): Promise<string> {
+    // Simulate IPFS upload
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return `Qm${Math.random().toString(36).substr(2, 44)}`;
+  }
+
+  /**
    * Mint NFT on blockchain
    */
   private async mintOnChain(
@@ -148,3 +157,8 @@ export class NFTService {
 
 // Export singleton instance
 export const nftService = NFTService.getInstance();
+
+// Export helper function for uploading to IPFS
+export const uploadToIPFS = async (data: string): Promise<string> => {
+  return nftService.uploadDataToIPFS(data);
+};
