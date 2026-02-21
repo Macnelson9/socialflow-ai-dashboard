@@ -8,6 +8,9 @@ import { CreatePost } from './components/CreatePost';
 import { MediaLibrary } from './components/MediaLibrary';
 import { Inbox } from './components/Inbox';
 import { Settings } from './components/Settings';
+import { NFTMinter } from './components/blockchain/NFTMinter';
+import { CampaignWizard } from './components/blockchain/CampaignWizard';
+import { CampaignDashboard } from './components/blockchain/CampaignDashboard';
 import { View } from './types';
 
 const App: React.FC = () => {
@@ -23,6 +26,9 @@ const App: React.FC = () => {
       case View.CREATE_POST: return <CreatePost {...props} />;
       case View.MEDIA_LIBRARY: return <MediaLibrary {...props} />;
       case View.INBOX: return <Inbox {...props} />;
+      case View.NFT_MINTER: return <NFTMinter {...props} />;
+      case View.CAMPAIGN_WIZARD: return <CampaignWizard {...props} />;
+      case View.CAMPAIGN_DASHBOARD: return <CampaignDashboard {...props} />;
       case View.SETTINGS: return <Settings {...props} />;
       default: return <Dashboard {...props} />;
     }
