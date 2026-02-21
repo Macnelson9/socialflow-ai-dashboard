@@ -59,3 +59,17 @@ export enum Platform {
   LINKEDIN = 'linkedin',
   X = 'x'
 }
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  displayName: string;
+  avatar?: string;
+  isVerified?: boolean;
+  verificationStatus?: {
+    isVerified: boolean;
+    stellarAddress?: string;
+    transactionHash?: string;
+    verifiedAt?: Date;
+  };
+}

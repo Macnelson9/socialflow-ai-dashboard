@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { identityService, VerificationStatus } from '../services/identityService';
+import { VerificationBadge } from './VerificationBadge';
 
 const MaterialIcon = ({ name, className }: { name: string, className?: string }) => (
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
@@ -8,9 +10,22 @@ export const Header: React.FC = () => {
   const [searchValue, setSearchValue] = useState('');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>({ isVerified: false });
   
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Mock user ID - in production, this would come from auth context
+  const userId = 'user_123';
+
+  useEffect(() => {
+    loadVerificationStatus();
+  }, []);
+
+  const loadVerificationStatus = async () => {
+    const status = await identityService.getVerificationStatus(userId);
+    setVerificationStatus(status);
+  };
 
   const useOutsideAlerter = (ref: React.RefObject<HTMLDivElement>, close: () => void) => {
     useEffect(() => {
@@ -84,7 +99,10 @@ export const Header: React.FC = () => {
               className="w-10 h-10 rounded-full object-cover border-2 border-dark-border"
             />
             <div className="hidden md:block text-left">
-              <p className="text-sm font-semibold text-white leading-tight">Alex Morgan</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-semibold text-white leading-tight">Alex Morgan</p>
+                <VerificationBadge verificationStatus={verificationStatus} size="sm" />
+              </div>
               <p className="text-xs text-gray-subtext">Pro Plan</p>
             </div>
             <MaterialIcon name="expand_more" className={`text-gray-subtext hidden md:block transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
