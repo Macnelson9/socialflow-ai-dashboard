@@ -8,6 +8,7 @@ export enum View {
   NFT_MINTER = 'NFT_MINTER',
   CAMPAIGN_WIZARD = 'CAMPAIGN_WIZARD',
   CAMPAIGN_DASHBOARD = 'CAMPAIGN_DASHBOARD',
+  CAMPAIGN_DETAIL = 'CAMPAIGN_DETAIL',
   SETTINGS = 'SETTINGS'
 }
 
@@ -124,4 +125,53 @@ export interface Campaign {
     rewardsDistributed: number;
     engagementCount: number;
   };
+  participants?: CampaignParticipant[];
+  rewardHistory?: RewardTransaction[];
+}
+
+export interface CampaignParticipant {
+  id: string;
+  username: string;
+  avatar: string;
+  walletAddress: string;
+  rewardsEarned: number;
+  engagementCount: number;
+  joinedAt: Date;
+  rank?: number;
+}
+
+export interface RewardTransaction {
+  id: string;
+  participantId: string;
+  participantName: string;
+  amount: number;
+  asset: string;
+  action: string;
+  timestamp: Date;
+  txHash: string;
+}
+
+export interface CampaignReport {
+  campaignId: string;
+  campaignName: string;
+  generatedAt: Date;
+  period: {
+    start: Date;
+    end: Date;
+  };
+  metrics: {
+    totalParticipants: number;
+    totalEngagement: number;
+    totalRewardsDistributed: number;
+    budgetUtilization: number;
+    roi: number;
+    averageRewardPerUser: number;
+  };
+  topPerformers: CampaignParticipant[];
+  rewardHistory: RewardTransaction[];
+  onChainVerification: string;
+}
+
+export interface ViewPropsWithCampaign extends ViewProps {
+  campaignId?: string;
 }

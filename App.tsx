@@ -11,6 +11,7 @@ import { Settings } from './components/Settings';
 import { NFTMinter } from './components/blockchain/NFTMinter';
 import { CampaignWizard } from './components/blockchain/CampaignWizard';
 import { CampaignDashboard } from './components/blockchain/CampaignDashboard';
+import { CampaignDetail } from './components/blockchain/CampaignDetail';
 import { View } from './types';
 
 const App: React.FC = () => {
@@ -29,6 +30,7 @@ const App: React.FC = () => {
       case View.NFT_MINTER: return <NFTMinter {...props} />;
       case View.CAMPAIGN_WIZARD: return <CampaignWizard {...props} />;
       case View.CAMPAIGN_DASHBOARD: return <CampaignDashboard {...props} />;
+      case View.CAMPAIGN_DETAIL: return <CampaignDetail {...props} />;
       case View.SETTINGS: return <Settings {...props} />;
       default: return <Dashboard {...props} />;
     }

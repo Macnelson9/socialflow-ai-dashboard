@@ -319,7 +319,11 @@ export const CampaignDashboard: React.FC<ViewProps> = ({ onNavigate }) => {
                       <MaterialIcon name="play_arrow" className="text-gray-subtext hover:text-white" />
                     </button>
                   )}
-                  <button className="p-2 hover:bg-dark-bg rounded-lg transition-colors" title="View Details">
+                  <button 
+                    onClick={() => onNavigate(View.CAMPAIGN_DETAIL)}
+                    className="p-2 hover:bg-dark-bg rounded-lg transition-colors" 
+                    title="View Details"
+                  >
                     <MaterialIcon name="visibility" className="text-gray-subtext hover:text-white" />
                   </button>
                   <button className="p-2 hover:bg-dark-bg rounded-lg transition-colors" title="Edit Campaign">
