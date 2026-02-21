@@ -21,6 +21,17 @@ export interface ViewProps {
   onNavigate: (view: View) => void;
 }
 
+export interface MonetizationSettings {
+  enableTips: boolean;
+  payPerView: boolean;
+  subscriptionOnly: boolean;
+  tipAmount?: number;
+  accessPrice?: number;
+  selectedToken?: string;
+  ipfsMetadataHash?: string;
+  accessControlContract?: string;
+}
+
 export interface Post {
   id: string;
   platform: "instagram" | "tiktok" | "facebook" | "youtube" | "linkedin" | "x";
@@ -32,6 +43,7 @@ export interface Post {
     likes: number;
     views: number;
   };
+  monetization?: MonetizationSettings;
 }
 
 export interface Message {
