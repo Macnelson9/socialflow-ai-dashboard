@@ -5,7 +5,8 @@ export enum View {
   CREATE_POST = 'CREATE_POST',
   MEDIA_LIBRARY = 'MEDIA_LIBRARY',
   INBOX = 'INBOX',
-  SETTINGS = 'SETTINGS'
+  SETTINGS = 'SETTINGS',
+  PROMOTION = 'PROMOTION'
 }
 
 export interface NavItem {
@@ -29,6 +30,9 @@ export interface Post {
     likes: number;
     views: number;
   };
+  isSponsored?: boolean;
+  promotionBudget?: number;
+  promotionCurrency?: 'XLM' | 'TOKEN';
 }
 
 export interface Message {

@@ -8,6 +8,7 @@ import { CreatePost } from './components/CreatePost';
 import { MediaLibrary } from './components/MediaLibrary';
 import { Inbox } from './components/Inbox';
 import { Settings } from './components/Settings';
+import { PromotionManager } from './components/PromotionManager';
 import { View } from './types';
 
 const App: React.FC = () => {
@@ -21,6 +22,7 @@ const App: React.FC = () => {
       case View.ANALYTICS: return <Analytics {...props} />;
       case View.CALENDAR: return <Calendar {...props} />;
       case View.CREATE_POST: return <CreatePost {...props} />;
+      case View.PROMOTION: return <PromotionManager />;
       case View.MEDIA_LIBRARY: return <MediaLibrary {...props} />;
       case View.INBOX: return <Inbox {...props} />;
       case View.SETTINGS: return <Settings {...props} />;
