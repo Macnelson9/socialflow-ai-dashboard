@@ -59,3 +59,31 @@ export enum Platform {
   LINKEDIN = 'linkedin',
   X = 'x'
 }
+
+// Soroban Smart Contract Types
+export interface SorobanSimulationResult {
+  success: boolean;
+  cpuInstructions: number;
+  memoryBytes: number;
+  gasFee: string;
+  error?: string;
+}
+
+export interface SorobanDeploymentResult {
+  success: boolean;
+  contractId?: string;
+  transactionHash?: string;
+  error?: string;
+}
+
+export interface SmartCampaign {
+  id: string;
+  name: string;
+  contractId?: string;
+  budget: string;
+  duration: number;
+  rewardRules: string;
+  status: 'draft' | 'deployed' | 'active' | 'completed' | 'failed';
+  deploymentHash?: string;
+  createdAt: Date;
+}
