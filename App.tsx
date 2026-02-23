@@ -16,6 +16,10 @@ import { View } from "./types";
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.BLOCKCHAIN_MONITOR);
 
+  useEffect(() => {
+    offlineQueue.init().catch(console.error);
+  }, []);
+
   const renderView = () => {
     const props = { onNavigate: setCurrentView };
 
@@ -59,6 +63,8 @@ const App: React.FC = () => {
         <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scroll-smooth">
           {renderView()}
         </main>
+
+        <OfflineIndicator />
       </div>
     </div>
   );
