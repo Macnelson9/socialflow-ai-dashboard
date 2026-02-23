@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from './ui/Card';
 import { ViewProps } from '../types';
+import { LazyImage } from './LazyImage';
+import { ListSkeleton } from './ui/Skeleton';
 
 const MaterialIcon = ({ name, className }: { name: string, className?: string }) => (
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
@@ -21,6 +23,7 @@ export const MediaLibrary: React.FC<ViewProps> = () => {
   const [selectedFolder, setSelectedFolder] = useState('All Media');
   const [layout, setLayout] = useState<'grid' | 'list'>('grid');
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -119,9 +122,16 @@ export const MediaLibrary: React.FC<ViewProps> = () => {
 
            {layout === 'grid' ? (
                <div className="columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
-                  {filteredItems.map((item) => (
+                  {loading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="break-inside-avoid">
+                        <div className="w-full h-64 bg-white/5 rounded-2xl animate-pulse" />
+                      </div>
+                    ))
+                  ) : (
+                    filteredItems.map((item) => (
                      <div key={item.id} className="relative group break-inside-avoid cursor-pointer">
-                        <img 
+                        <LazyImage 
                           src={item.url} 
                           alt={item.name} 
                           className="w-full rounded-2xl border border-dark-border group-hover:border-primary-blue/50 transition-colors"
@@ -146,13 +156,16 @@ export const MediaLibrary: React.FC<ViewProps> = () => {
                            </div>
                         </div>
                      </div>
-                  ))}
+                  )))}
                </div>
            ) : (
                <div className="space-y-2">
-                   {filteredItems.map((item) => (
+                   {loading ? (
+                     <ListSkeleton count={6} />
+                   ) : (
+                     filteredItems.map((item) => (
                        <div key={item.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-colors border border-transparent hover:border-dark-border cursor-pointer">
-                           <img src={item.url} className="w-12 h-12 rounded-lg object-cover" />
+                           <LazyImage src={item.url} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
                            <div className="flex-1">
                                <p className="text-sm font-medium text-white">{item.name}</p>
                                <p className="text-xs text-gray-subtext uppercase">{item.type}</p>
@@ -169,7 +182,7 @@ export const MediaLibrary: React.FC<ViewProps> = () => {
                                 )}
                             </div>
                        </div>
-                   ))}
+                   )))}
                </div>
            )}
            
