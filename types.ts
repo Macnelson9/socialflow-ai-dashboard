@@ -20,6 +20,7 @@ export interface NavItem {
 export interface ViewProps {
   onNavigate: (view: View) => void;
 }
+51
 
 export interface MonetizationSettings {
   enableTips: boolean;
