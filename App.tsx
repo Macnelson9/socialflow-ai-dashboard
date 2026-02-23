@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
@@ -8,10 +8,16 @@ import { CreatePost } from './components/CreatePost';
 import { MediaLibrary } from './components/MediaLibrary';
 import { Inbox } from './components/Inbox';
 import { Settings } from './components/Settings';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { View } from './types';
+import { offlineQueue } from './services/offlineQueue';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
+
+  useEffect(() => {
+    offlineQueue.init().catch(console.error);
+  }, []);
 
   const renderView = () => {
     const props = { onNavigate: setCurrentView };
@@ -42,6 +48,8 @@ const App: React.FC = () => {
         <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scroll-smooth">
           {renderView()}
         </main>
+
+        <OfflineIndicator />
       </div>
     </div>
   );
