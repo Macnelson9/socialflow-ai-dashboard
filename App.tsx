@@ -14,7 +14,7 @@ import { AccountPerformance } from "./components/AccountPerformance";
 import { View } from "./types";
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
+  const [currentView, setCurrentView] = useState<View>(View.BLOCKCHAIN_MONITOR);
 
   const renderView = () => {
     const props = { onNavigate: setCurrentView };
