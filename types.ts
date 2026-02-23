@@ -14,7 +14,7 @@ export enum View {
 export interface NavItem {
   id: View;
   label: string;
-  icon: React.ReactNode;
+  icon: any;
 }
 
 export interface ViewProps {
