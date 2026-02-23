@@ -8,10 +8,11 @@ import { CreatePost } from './components/CreatePost';
 import { MediaLibrary } from './components/MediaLibrary';
 import { Inbox } from './components/Inbox';
 import { Settings } from './components/Settings';
+import BlockchainMonitor from './components/BlockchainMonitor';
 import { View } from './types';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
+  const [currentView, setCurrentView] = useState<View>(View.BLOCKCHAIN_MONITOR);
 
   const renderView = () => {
     const props = { onNavigate: setCurrentView };
@@ -24,6 +25,7 @@ const App: React.FC = () => {
       case View.MEDIA_LIBRARY: return <MediaLibrary {...props} />;
       case View.INBOX: return <Inbox {...props} />;
       case View.SETTINGS: return <Settings {...props} />;
+      case View.BLOCKCHAIN_MONITOR: return <BlockchainMonitor />;
       default: return <Dashboard {...props} />;
     }
   };
