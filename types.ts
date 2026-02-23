@@ -1,11 +1,14 @@
 export enum View {
-  DASHBOARD = 'DASHBOARD',
-  ANALYTICS = 'ANALYTICS',
-  CALENDAR = 'CALENDAR',
-  CREATE_POST = 'CREATE_POST',
-  MEDIA_LIBRARY = 'MEDIA_LIBRARY',
-  INBOX = 'INBOX',
-  SETTINGS = 'SETTINGS'
+  DASHBOARD = "DASHBOARD",
+  ANALYTICS = "ANALYTICS",
+  CALENDAR = "CALENDAR",
+  CREATE_POST = "CREATE_POST",
+  MEDIA_LIBRARY = "MEDIA_LIBRARY",
+  INBOX = "INBOX",
+  SETTINGS = "SETTINGS",
+  PORTFOLIO = "PORTFOLIO",
+  TRANSACTION_HISTORY = "TRANSACTION_HISTORY",
+  ACCOUNT_PERFORMANCE = "ACCOUNT_PERFORMANCE",
 }
 
 export interface NavItem {
@@ -18,17 +21,29 @@ export interface ViewProps {
   onNavigate: (view: View) => void;
 }
 
+export interface MonetizationSettings {
+  enableTips: boolean;
+  payPerView: boolean;
+  subscriptionOnly: boolean;
+  tipAmount?: number;
+  accessPrice?: number;
+  selectedToken?: string;
+  ipfsMetadataHash?: string;
+  accessControlContract?: string;
+}
+
 export interface Post {
   id: string;
-  platform: 'instagram' | 'tiktok' | 'facebook' | 'youtube' | 'linkedin' | 'x';
+  platform: "instagram" | "tiktok" | "facebook" | "youtube" | "linkedin" | "x";
   content: string;
   image?: string;
   date: Date;
-  status: 'scheduled' | 'published' | 'draft';
+  status: "scheduled" | "published" | "draft";
   stats?: {
     likes: number;
     views: number;
   };
+  monetization?: MonetizationSettings;
 }
 
 export interface Message {
@@ -42,81 +57,40 @@ export interface Message {
 
 export interface Conversation {
   id: string;
-  platform: 'instagram' | 'facebook' | 'x';
+  platform: "instagram" | "facebook" | "x";
   user: string;
   avatar: string;
   lastMessage: string;
   unread: boolean;
-  status: 'new' | 'pending' | 'resolved';
+  status: "new" | "pending" | "resolved";
   messages: Message[];
 }
 
 export enum Platform {
-  INSTAGRAM = 'instagram',
-  TIKTOK = 'tiktok',
-  FACEBOOK = 'facebook',
-  YOUTUBE = 'youtube',
-  LINKEDIN = 'linkedin',
-  X = 'x'
+  INSTAGRAM = "instagram",
+  TIKTOK = "tiktok",
+  FACEBOOK = "facebook",
+  YOUTUBE = "youtube",
+  LINKEDIN = "linkedin",
+  X = "x",
 }
 
-// Payment & Blockchain Types
-export interface Asset {
-  id: string;
-  symbol: string;
-  name: string;
-  balance: number;
-  decimals: number;
-  icon?: string;
+export interface BlockchainAsset {
+  code: string;
+  issuer: string;
+  balance: string;
+  limit?: string;
+  value?: number;
+  price?: number;
 }
 
-export interface PaymentFormData {
-  recipientAddress: string;
-  amount: string;
-  assetId: string;
-  memo?: string;
+export interface PortfolioSummary {
+  totalValue: number;
+  assets: BlockchainAsset[];
+  currency: string;
+  lastUpdated: Date;
 }
 
-export interface PaymentSummary {
-  recipientAddress: string;
-  amount: string;
-  asset: Asset;
-  estimatedGasFee: string;
-  totalCost: string;
-  memo?: string;
-}
-
-export interface TransactionStatus {
-  id: string;
-  hash: string;
-  status: 'pending' | 'success' | 'error';
-  timestamp: Date;
-  amount: string;
-  asset: Asset;
-  recipientAddress: string;
-  errorMessage?: string;
-}
-
-export interface PaymentRequest {
-  id: string;
-  recipientAddress: string;
-  amount: string;
-  asset: Asset;
-  memo?: string;
-  qrCode: string;
-  shareableLink: string;
-  createdAt: Date;
-}
-
-export interface RecurringPayment {
-  id: string;
-  recipientAddress: string;
-  amount: string;
-  asset: Asset;
-  frequency: 'daily' | 'weekly' | 'monthly';
-  startDate: Date;
-  endDate?: Date;
-  nextPaymentDate: Date;
-  isActive: boolean;
-  memo?: string;
-}
+export type AssetFilter = "all" | "tokens" | "nfts" | "zero_balance";
+export type AssetSort = "name" | "balance" | "value";
+export type SortDirection = "asc" | "desc";
