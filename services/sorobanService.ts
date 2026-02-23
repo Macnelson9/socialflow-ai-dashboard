@@ -55,10 +55,11 @@ export class SorobanService {
       const simulation = await this.server.simulateTransaction(transaction);
 
       if (rpc.Api.isSimulationSuccess(simulation)) {
+        const cost = (simulation as any).cost || {};
         return {
           success: true,
-          cpuInstructions: Number(simulation.cost?.cpuInsns || 0),
-          memoryBytes: Number(simulation.cost?.memBytes || 0),
+          cpuInstructions: Number(cost.cpuInsns || 0),
+          memoryBytes: Number(cost.memBytes || 0),
           gasFee: simulation.minResourceFee || '0',
         };
       }
