@@ -154,7 +154,10 @@ export const Settings: React.FC<ViewProps> = () => {
               <span>Profile Settings</span>
               <span className="material-symbols-outlined">arrow_forward_ios</span>
             </button>
-            <button className="w-full text-left bg-[#1A1D1F] hover:bg-[#2A2D2F] text-white py-3 px-4 rounded-lg flex justify-between items-center transition-colors">
+            <button 
+              onClick={() => setShowNotificationPrefs(true)}
+              className="w-full text-left bg-[#1A1D1F] hover:bg-[#2A2D2F] text-white py-3 px-4 rounded-lg flex justify-between items-center transition-colors"
+            >
               <span>Notification Preferences</span>
               <span className="material-symbols-outlined">arrow_forward_ios</span>
             </button>
