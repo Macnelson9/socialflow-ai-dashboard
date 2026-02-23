@@ -25,6 +25,18 @@ export const Header: React.FC = () => {
     return unsubscribe;
   }, []);
 
+  // Mock user ID - in production, this would come from auth context
+  const userId = 'user_123';
+
+  useEffect(() => {
+    loadVerificationStatus();
+  }, []);
+
+  const loadVerificationStatus = async () => {
+    const status = await identityService.getVerificationStatus(userId);
+    setVerificationStatus(status);
+  };
+
   const useOutsideAlerter = (ref: React.RefObject<HTMLDivElement>, close: () => void) => {
     useEffect(() => {
       function handleClickOutside(event: MouseEvent) {
