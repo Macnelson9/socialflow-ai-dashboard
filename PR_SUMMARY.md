@@ -1,266 +1,197 @@
-# Pull Request: Identity Verification UI (Issue #107)
+# Pull Request: Soroban Contract Bridge (Issue #201)
 
 ## Overview
-This PR implements the Identity Verification UI components for the SocialFlow AI Dashboard, enabling decentralized identity management and cross-platform social media account verification on the Stellar blockchain.
+This PR implements the Soroban Contract Bridge feature, enabling SocialFlow to interact with Stellar smart contracts for automated engagement distribution, budgeting treasuries, and public verification.
 
-## Branch
-`features/issue-107-Identity-Verification-UI` → `develop`
+## Changes Made
 
-## Components Implemented
+### Core Services
+- **SmartContractService** (`src/blockchain/services/SmartContractService.ts`)
+  - SorobanRpc.Server connection setup
+  - `invoke()` helper for contract calls (read-only and state-changing)
+  - Simulation before submission for resource usage estimation
+  - WASM deployment helper for admins
+  - Event parsing from transaction metadata
+  - Comprehensive error handling (out-of-gas, simulation failures, etc.)
 
-### 1. IdentityProfile.tsx (Issue 107.1)
-**Location:** `src/components/blockchain/IdentityProfile.tsx`
+- **WalletService** (`src/blockchain/services/WalletService.ts`)
+  - Integration with Freighter and Albedo wallets
+  - Non-custodial transaction signing
+  - Auto-detection of available wallets
+  - Network-aware signing
 
-**Features:**
-- Displays user profile information with clean, modern UI
-- Shows avatar image (IPFS-ready)
-- Displays user name, bio, and website
-- Shows truncated wallet address
-- Edit profile button with hover effects
-- Responsive design with Tailwind CSS
-- Uses existing Card component for consistency
+### Type Definitions
+- **soroban.ts** (`src/blockchain/types/soroban.ts`)
+  - ContractInvocationParams
+  - ContractSimulationResult
+  - ContractInvocationResult
+  - WasmDeploymentParams/Result
+  - Error type enums
 
-**Requirements Met:** 9.1, 9.4
+### Configuration
+- **soroban.config.ts** (`src/blockchain/config/soroban.config.ts`)
+  - Network configurations (Testnet, Mainnet, Futurenet)
+  - Default timeout and fee settings
 
-**Key Implementation Details:**
-- TypeScript interfaces for type safety
-- State management with React hooks
-- Glassmorphism design matching app theme
-- Online status indicator (green dot)
-- Clickable website link with external icon
+### Utilities
+- **sorobanHelpers.ts** (`src/blockchain/utils/sorobanHelpers.ts`)
+  - ScVal conversion helpers (toScVal, fromScVal)
+  - Type-specific converters (u64, i64, address, symbol, etc.)
+  - Error parsing utilities
+  - XLM/stroops conversion
 
----
+### React Integration
+- **useSorobanContract** (`src/blockchain/hooks/useSorobanContract.ts`)
+  - React hook for easy contract interactions
+  - Wallet connection management
+  - Read/write contract methods
+  - Simulation support
+  - Event fetching
 
-### 2. ProfileEditModal.tsx (Issue 107.2)
-**Location:** `src/components/blockchain/ProfileEditModal.tsx`
+### Examples & Documentation
+- **contractUsage.ts** - Comprehensive usage examples
+- **SorobanDemo.tsx** - Interactive demo component
+- **README.md** - Complete API documentation
+- **TESTING.md** - Testing guide and acceptance criteria verification
 
-**Features:**
-- Modal overlay for profile creation/editing
-- Form fields: name, bio, website, avatar upload
-- Real-time form validation
-- Avatar preview before upload
-- IPFS upload simulation (ready for integration)
-- File size validation (max 5MB)
-- URL format validation
-- Character limits (name: 50, bio: 200)
-- Loading state during submission
-- Error messaging for each field
-- Blockchain submission ready
+## Technical Implementation
 
-**Requirements Met:** 9.2, 9.4
+### 1. Read-Only Contract Calls
+```typescript
+const result = await sorobanService.invoke(
+  { contractId, method: 'balance', args: [addressToScVal(userAddress)] },
+  sourceAccount,
+  ContractCallType.READ_ONLY
+);
+```
+- No wallet signature required
+- Uses simulation only
+- Returns contract state immediately
 
-**Key Implementation Details:**
-- Controlled form components
-- Client-side validation
-- File upload with preview
-- Async submission handling
-- Accessible modal with close button
-- Responsive button states
+### 2. State-Changing Calls
+```typescript
+const result = await sorobanService.invoke(
+  { contractId, method: 'transfer', args: [...] },
+  sourceAccount,
+  ContractCallType.STATE_CHANGING,
+  signTransaction
+);
+```
+- Simulates first to estimate resources
+- Triggers wallet signature popup
+- Submits transaction to network
+- Polls for confirmation
+- Parses events from transaction meta
 
----
+### 3. Resource Estimation
+- Automatic simulation before every state-changing call
+- Calculates CPU instructions and memory usage
+- Estimates minimum resource fee
+- Prepares transaction with proper limits
 
-### 3. VerificationWizard.tsx (Issue 107.3)
-**Location:** `src/components/blockchain/VerificationWizard.tsx`
+### 4. Error Handling
+- **OUT_OF_GAS**: Resource limits exceeded
+- **SIMULATION_FAILED**: Pre-flight check failed
+- **TRANSACTION_FAILED**: Submission or execution failed
+- User-friendly error messages for each type
 
-**Features:**
-- Multi-step wizard interface (3 steps)
-- Platform selector with 6 social platforms:
-  - Instagram
-  - TikTok
-  - Facebook
-  - YouTube
-  - LinkedIn
-  - X (Twitter)
-- Unique verification code generation
-- Copy-to-clipboard functionality
-- Step-by-step posting instructions
-- Post URL input field
-- Progress indicator
-- Navigation between steps
-- Platform-specific icons and colors
+### 5. Event Parsing
+- Extracts events from transaction meta XDR
+- Parses event type, topics, and values
+- Returns structured event data
+- Supports historical event queries
 
-**Requirements Met:** 18.1, 18.2, 18.8
+## Acceptance Criteria ✅
 
-**Key Implementation Details:**
-- Step-based state management
-- Random verification code generation
-- Clipboard API integration
-- Visual feedback for user actions
-- Platform-agnostic design
-- URL validation
-- Completion callback for blockchain integration
+- [x] **Successful read-only contract call** - Implemented via `ContractCallType.READ_ONLY`
+- [x] **State-changing call triggers wallet signature** - Integrated with Freighter/Albedo
+- [x] **Correct handling of out-of-gas errors** - Specific error type and user-friendly messages
+- [x] **Event parsing from transaction metadata** - Full XDR parsing implementation
+- [x] **WASM deployment helper** - `deployWasm()` method for admins
 
----
+## Testing
 
-## Design System Compliance
+### Manual Testing
+1. Install Freighter or Albedo wallet
+2. Configure for Testnet
+3. Run the demo component
+4. Test read-only calls (no signature)
+5. Test state-changing calls (with signature)
+6. Verify error handling
+7. Check event parsing
 
-All components follow the existing SocialFlow design system:
+### Automated Testing
+See `src/blockchain/TESTING.md` for comprehensive test plan
 
-**Colors:**
-- `dark-bg`: #0d0f11
-- `dark-surface`: #161b22
-- `dark-border`: rgba(255, 255, 255, 0.05)
-- `primary-blue`: #3b82f6
-- `primary-teal`: #14b8a6
-- `gray-subtext`: #8892b0
+## Dependencies Added
+- `@stellar/stellar-sdk` - Official Stellar SDK with Soroban support
 
-**UI Patterns:**
-- Glassmorphism effects
-- Rounded corners (rounded-lg, rounded-xl, rounded-2xl)
-- Smooth transitions
-- Hover states
-- Consistent spacing
-- Lucide React icons
+## Security Considerations
+- ✅ Private keys never accessed by the service
+- ✅ All transaction signing delegated to wallet providers
+- ✅ Simulation performed before every state-changing call
+- ✅ Resource limits automatically calculated
+- ✅ Network passphrase validation
 
----
+## Usage Example
 
-## Technical Stack
+```typescript
+import { useSorobanContract } from './blockchain/hooks/useSorobanContract';
 
-- **React 18.2.0** - Component framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Lucide React** - Icons
-- **React Hooks** - State management
+function MyComponent() {
+  const { 
+    connectWallet, 
+    readContract, 
+    writeContract 
+  } = useSorobanContract('CONTRACT_ID', 'TESTNET');
 
----
+  // Connect wallet
+  await connectWallet();
 
-## Testing Checklist
+  // Read contract state
+  const balance = await readContract('balance', [addressToScVal(address)]);
 
-- [x] Components compile without TypeScript errors
-- [x] All imports resolve correctly
-- [x] Responsive design works on mobile/tablet/desktop
-- [x] Form validation works correctly
-- [x] File upload preview displays
-- [x] Verification code generation is unique
-- [x] Copy to clipboard functionality works
-- [x] Navigation between wizard steps works
-- [x] Modal opens and closes properly
-- [x] All buttons have proper hover states
-
----
-
-## Integration Notes
-
-### For Backend Integration:
-
-1. **IPFS Upload** (ProfileEditModal):
-   - Replace `setTimeout` simulation with actual IPFS upload
-   - Use Pinata, Web3.Storage, or IPFS HTTP client
-   - Store returned CID in profile data
-
-2. **Blockchain Submission** (ProfileEditModal):
-   - Integrate Stellar SDK
-   - Submit profile data to Soroban smart contract
-   - Handle transaction signing via wallet
-
-3. **Verification** (VerificationWizard):
-   - Implement post URL scraping/verification
-   - Check for verification code in post content
-   - Create signed attestation on Stellar
-   - Store verification status on-chain
-
-### Usage Example:
-
-```tsx
-import { IdentityProfile } from './components/blockchain/IdentityProfile';
-import { ProfileEditModal } from './components/blockchain/ProfileEditModal';
-import { VerificationWizard } from './components/blockchain/VerificationWizard';
-
-function IdentityPage() {
-  const [isEditOpen, setIsEditOpen] = useState(false);
-
-  return (
-    <>
-      <IdentityProfile onEditProfile={() => setIsEditOpen(true)} />
-      <ProfileEditModal 
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        onSave={(data) => {
-          // Handle IPFS upload and blockchain submission
-          console.log('Profile data:', data);
-        }}
-      />
-      <VerificationWizard 
-        onComplete={(platform, postUrl) => {
-          // Handle verification
-          console.log('Verify:', platform, postUrl);
-        }}
-      />
-    </>
-  );
+  // Execute transaction
+  const result = await writeContract('transfer', [
+    addressToScVal(from),
+    addressToScVal(to),
+    u64ToScVal(amount)
+  ]);
 }
 ```
 
----
+## Next Steps
+1. Integrate with SocialFlow dashboard UI
+2. Create contract-specific wrappers for engagement campaigns
+3. Implement real-time event listeners
+4. Add transaction history tracking
+5. Build admin panel for contract deployment
 
-## Screenshots
+## Files Changed
+- `package.json` - Added @stellar/stellar-sdk dependency
+- `src/blockchain/` - New directory with complete implementation
+  - services/ (SmartContractService, WalletService)
+  - types/ (TypeScript interfaces)
+  - config/ (Network configurations)
+  - utils/ (Helper functions)
+  - hooks/ (React integration)
+  - examples/ (Usage examples)
+  - components/ (Demo component)
+  - README.md (Documentation)
+  - TESTING.md (Test plan)
+  - index.ts (Centralized exports)
 
-(Add screenshots after testing in browser)
+## Branch
+`features/issue-201-Soroban-Contract-Bridge`
 
----
+## Target Branch
+`develop`
 
 ## Related Issues
-
-- Closes #107
-- Related to #9 (Decentralized Identity Management)
-- Related to #18 (Cross-Platform Identity Verification)
+Closes #201
 
 ---
 
-## Next Steps
+**Ready for Review** ✅
 
-After this PR is merged:
-1. Integrate IPFS upload functionality
-2. Connect to Stellar wallet for blockchain transactions
-3. Implement Soroban smart contract for identity storage
-4. Add social media post verification logic
-5. Create identity verification dashboard view
-
----
-
-## Commit Message
-
-```
-feat: Implement Identity Verification UI (Issue #107)
-
-- Add IdentityProfile component (107.1)
-  * Display user profile with avatar from IPFS
-  * Show name, bio, website, and wallet address
-  * Include edit profile button
-  * Requirements: 9.1, 9.4
-
-- Add ProfileEditModal component (107.2)
-  * Profile creation/editing form modal
-  * Fields: name, bio, website, avatar upload
-  * Avatar upload to IPFS simulation
-  * Form validation
-  * Blockchain submission ready
-  * Requirements: 9.2, 9.4
-
-- Add VerificationWizard component (107.3)
-  * Multi-step social account verification wizard
-  * Platform selector (Instagram, TikTok, Facebook, YouTube, LinkedIn, X)
-  * Unique verification code generation
-  * Posting instructions display
-  * Post URL input field
-  * Requirements: 18.1, 18.2, 18.8
-```
-
----
-
-## PR Checklist
-
-- [x] Code follows project style guidelines
-- [x] Components are properly typed with TypeScript
-- [x] All requirements from issue #107 are met
-- [x] Components use existing design system
-- [x] No console errors or warnings
-- [x] Branch created from correct base
-- [x] Commit message follows convention
-- [x] Ready for code review
-
----
-
-**PR Link:** https://github.com/Ejirowebfi/socialflow-ai-dashboard/pull/new/features/issue-107-Identity-Verification-UI
-
-**Target Branch:** `develop`
+All acceptance criteria met. Comprehensive documentation and examples included. No TypeScript errors. Ready to merge into develop branch.
