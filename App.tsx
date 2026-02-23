@@ -8,7 +8,9 @@ import { CreatePost } from "./components/CreatePost";
 import { MediaLibrary } from "./components/MediaLibrary";
 import { Inbox } from "./components/Inbox";
 import { Settings } from "./components/Settings";
-import { NFTGallery } from "./components/blockchain/NFTGallery";
+import { PortfolioView } from "./components/blockchain/PortfolioView";
+import { TransactionHistory } from "./components/blockchain/TransactionHistory";
+import { AccountPerformance } from "./components/AccountPerformance";
 import { View } from "./types";
 
 const App: React.FC = () => {
@@ -30,10 +32,14 @@ const App: React.FC = () => {
         return <MediaLibrary {...props} />;
       case View.INBOX:
         return <Inbox {...props} />;
+      case View.PORTFOLIO:
+        return <PortfolioView />;
+      case View.TRANSACTION_HISTORY:
+        return <TransactionHistory {...props} />;
+      case View.ACCOUNT_PERFORMANCE:
+        return <AccountPerformance {...props} />;
       case View.SETTINGS:
         return <Settings {...props} />;
-      case View.NFT_GALLERY:
-        return <NFTGallery {...props} />;
       default:
         return <Dashboard {...props} />;
     }

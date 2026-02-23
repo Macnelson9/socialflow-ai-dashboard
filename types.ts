@@ -6,7 +6,9 @@ export enum View {
   MEDIA_LIBRARY = "MEDIA_LIBRARY",
   INBOX = "INBOX",
   SETTINGS = "SETTINGS",
-  NFT_GALLERY = "NFT_GALLERY",
+  PORTFOLIO = "PORTFOLIO",
+  TRANSACTION_HISTORY = "TRANSACTION_HISTORY",
+  ACCOUNT_PERFORMANCE = "ACCOUNT_PERFORMANCE",
 }
 
 export interface NavItem {
@@ -17,6 +19,18 @@ export interface NavItem {
 
 export interface ViewProps {
   onNavigate: (view: View) => void;
+}
+51
+
+export interface MonetizationSettings {
+  enableTips: boolean;
+  payPerView: boolean;
+  subscriptionOnly: boolean;
+  tipAmount?: number;
+  accessPrice?: number;
+  selectedToken?: string;
+  ipfsMetadataHash?: string;
+  accessControlContract?: string;
 }
 
 export interface Post {
@@ -30,6 +44,7 @@ export interface Post {
     likes: number;
     views: number;
   };
+  monetization?: MonetizationSettings;
 }
 
 export interface Message {
@@ -61,59 +76,22 @@ export enum Platform {
   X = "x",
 }
 
-// NFT Types
-export interface NFTAttribute {
-  trait_type: string;
-  value: string | number;
+export interface BlockchainAsset {
+  code: string;
+  issuer: string;
+  balance: string;
+  limit?: string;
+  value?: number;
+  price?: number;
 }
 
-export interface NFTMetadata {
-  name: string;
-  description: string;
-  image: string;
-  external_url?: string;
-  attributes?: NFTAttribute[];
+export interface PortfolioSummary {
+  totalValue: number;
+  assets: BlockchainAsset[];
+  currency: string;
+  lastUpdated: Date;
 }
 
-export interface NFT {
-  id: string;
-  tokenId: string;
-  contractAddress: string;
-  title: string;
-  description: string;
-  image: string;
-  imageThumbnail: string;
-  externalUrl?: string;
-  attributes: NFTAttribute[];
-  collection: string;
-  collectionImage?: string;
-  owner: string;
-  creator: string;
-  createdAt: string;
-  updatedAt: string;
-  ipfsImage?: string;
-}
-
-export interface NFTTransfer {
-  id: string;
-  from: string;
-  to: string;
-  timestamp: string;
-  transactionHash: string;
-  price?: string;
-}
-
-export type NFTSortOption =
-  | "date_desc"
-  | "date_asc"
-  | "name_asc"
-  | "name_desc"
-  | "collection";
-
-export interface NFTFilterState {
-  collection: string | null;
-  searchQuery: string;
-  dateFrom: string | null;
-  dateTo: string | null;
-  sortBy: NFTSortOption;
-}
+export type AssetFilter = "all" | "tokens" | "nfts" | "zero_balance";
+export type AssetSort = "name" | "balance" | "value";
+export type SortDirection = "asc" | "desc";
