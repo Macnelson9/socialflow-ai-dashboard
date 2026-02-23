@@ -1,146 +1,197 @@
-# Pull Request: Soroban Contract Bridge Implementation
+# Pull Request: Soroban Contract Bridge (Issue #201)
 
-## Issue Reference
-Closes #201.1 - Soroban Contract Bridge (Extended)/1
+## Overview
+This PR implements the Soroban Contract Bridge feature, enabling SocialFlow to interact with Stellar smart contracts for automated engagement distribution, budgeting treasuries, and public verification.
 
-## Tasks Completed
+## Changes Made
 
-### ✅ Task 201.3: Implement Contract Simulation
-- Added `simulateContract()` method to estimate resources before execution
-- Calculates CPU instructions, memory usage, and gas fees
-- Validates contract parameters before submission
-- Returns structured simulation results with error handling
+### Core Services
+- **SmartContractService** (`src/blockchain/services/SmartContractService.ts`)
+  - SorobanRpc.Server connection setup
+  - `invoke()` helper for contract calls (read-only and state-changing)
+  - Simulation before submission for resource usage estimation
+  - WASM deployment helper for admins
+  - Event parsing from transaction metadata
+  - Comprehensive error handling (out-of-gas, simulation failures, etc.)
 
-### ✅ Task 201.4: Implement WASM Deployment
-- Added `deployContract()` method for WASM binary deployment
-- Uploads contract to Stellar network
-- Initializes contracts with custom parameters
-- Waits for transaction confirmation
-- Extracts and returns deployed contract ID
-- Comprehensive error handling throughout
+- **WalletService** (`src/blockchain/services/WalletService.ts`)
+  - Integration with Freighter and Albedo wallets
+  - Non-custodial transaction signing
+  - Auto-detection of available wallets
+  - Network-aware signing
 
-## Requirements Satisfied
-- ✅ Requirement 5.1: Smart Contract Deployment
-- ✅ Requirement 5.2: Contract Initialization
-- ✅ Requirement 5.7: Resource Estimation
+### Type Definitions
+- **soroban.ts** (`src/blockchain/types/soroban.ts`)
+  - ContractInvocationParams
+  - ContractSimulationResult
+  - ContractInvocationResult
+  - WasmDeploymentParams/Result
+  - Error type enums
 
-## Implementation Details
+### Configuration
+- **soroban.config.ts** (`src/blockchain/config/soroban.config.ts`)
+  - Network configurations (Testnet, Mainnet, Futurenet)
+  - Default timeout and fee settings
 
-### New Files
-1. **services/sorobanService.ts** - Core Soroban service implementation
-2. **services/sorobanService.test.ts** - Test suite validating functionality
-3. **services/campaignContractManager.ts** - Integration example for campaigns
-4. **services/SOROBAN_IMPLEMENTATION.md** - Comprehensive documentation
+### Utilities
+- **sorobanHelpers.ts** (`src/blockchain/utils/sorobanHelpers.ts`)
+  - ScVal conversion helpers (toScVal, fromScVal)
+  - Type-specific converters (u64, i64, address, symbol, etc.)
+  - Error parsing utilities
+  - XLM/stroops conversion
 
-### Modified Files
-1. **package.json** - Added @stellar/stellar-sdk dependency
-2. **types.ts** - Added Soroban-related TypeScript types
+### React Integration
+- **useSorobanContract** (`src/blockchain/hooks/useSorobanContract.ts`)
+  - React hook for easy contract interactions
+  - Wallet connection management
+  - Read/write contract methods
+  - Simulation support
+  - Event fetching
 
-### Key Features
-- **Network Support**: Both testnet and mainnet configurations
-- **Error Handling**: Graceful error handling with descriptive messages
-- **Type Safety**: Full TypeScript support with proper interfaces
-- **Resource Estimation**: Pre-execution cost calculation
-- **Transaction Confirmation**: Waits for blockchain confirmation
-- **Modular Design**: Easy integration with existing SocialFlow components
+### Examples & Documentation
+- **contractUsage.ts** - Comprehensive usage examples
+- **SorobanDemo.tsx** - Interactive demo component
+- **README.md** - Complete API documentation
+- **TESTING.md** - Testing guide and acceptance criteria verification
+
+## Technical Implementation
+
+### 1. Read-Only Contract Calls
+```typescript
+const result = await sorobanService.invoke(
+  { contractId, method: 'balance', args: [addressToScVal(userAddress)] },
+  sourceAccount,
+  ContractCallType.READ_ONLY
+);
+```
+- No wallet signature required
+- Uses simulation only
+- Returns contract state immediately
+
+### 2. State-Changing Calls
+```typescript
+const result = await sorobanService.invoke(
+  { contractId, method: 'transfer', args: [...] },
+  sourceAccount,
+  ContractCallType.STATE_CHANGING,
+  signTransaction
+);
+```
+- Simulates first to estimate resources
+- Triggers wallet signature popup
+- Submits transaction to network
+- Polls for confirmation
+- Parses events from transaction meta
+
+### 3. Resource Estimation
+- Automatic simulation before every state-changing call
+- Calculates CPU instructions and memory usage
+- Estimates minimum resource fee
+- Prepares transaction with proper limits
+
+### 4. Error Handling
+- **OUT_OF_GAS**: Resource limits exceeded
+- **SIMULATION_FAILED**: Pre-flight check failed
+- **TRANSACTION_FAILED**: Submission or execution failed
+- User-friendly error messages for each type
+
+### 5. Event Parsing
+- Extracts events from transaction meta XDR
+- Parses event type, topics, and values
+- Returns structured event data
+- Supports historical event queries
+
+## Acceptance Criteria ✅
+
+- [x] **Successful read-only contract call** - Implemented via `ContractCallType.READ_ONLY`
+- [x] **State-changing call triggers wallet signature** - Integrated with Freighter/Albedo
+- [x] **Correct handling of out-of-gas errors** - Specific error type and user-friendly messages
+- [x] **Event parsing from transaction metadata** - Full XDR parsing implementation
+- [x] **WASM deployment helper** - `deployWasm()` method for admins
 
 ## Testing
 
-Run the test suite:
-```bash
-npx tsx services/sorobanService.test.ts
-```
+### Manual Testing
+1. Install Freighter or Albedo wallet
+2. Configure for Testnet
+3. Run the demo component
+4. Test read-only calls (no signature)
+5. Test state-changing calls (with signature)
+6. Verify error handling
+7. Check event parsing
 
-Test results show:
-- ✅ Service initialization works correctly
-- ✅ Contract simulation API validated
-- ✅ WASM deployment API validated
-- ✅ Error handling works as expected
-- ✅ All method signatures correct
+### Automated Testing
+See `src/blockchain/TESTING.md` for comprehensive test plan
+
+## Dependencies Added
+- `@stellar/stellar-sdk` - Official Stellar SDK with Soroban support
+
+## Security Considerations
+- ✅ Private keys never accessed by the service
+- ✅ All transaction signing delegated to wallet providers
+- ✅ Simulation performed before every state-changing call
+- ✅ Resource limits automatically calculated
+- ✅ Network passphrase validation
 
 ## Usage Example
 
 ```typescript
-import { SorobanService } from './services/sorobanService';
-import { Keypair } from '@stellar/stellar-sdk';
+import { useSorobanContract } from './blockchain/hooks/useSorobanContract';
 
-// Initialize service
-const soroban = new SorobanService();
+function MyComponent() {
+  const { 
+    connectWallet, 
+    readContract, 
+    writeContract 
+  } = useSorobanContract('CONTRACT_ID', 'TESTNET');
 
-// Simulate contract execution
-const simulation = await soroban.simulateContract(
-  contractId,
-  'method_name',
-  params,
-  sourceAccount
-);
+  // Connect wallet
+  await connectWallet();
 
-console.log(`Gas Fee: ${simulation.gasFee} stroops`);
-console.log(`CPU: ${simulation.cpuInstructions}`);
+  // Read contract state
+  const balance = await readContract('balance', [addressToScVal(address)]);
 
-// Deploy contract
-const deployment = await soroban.deployContract(
-  wasmHash,
-  initParams,
-  keypair
-);
-
-console.log(`Contract ID: ${deployment.contractId}`);
+  // Execute transaction
+  const result = await writeContract('transfer', [
+    addressToScVal(from),
+    addressToScVal(to),
+    u64ToScVal(amount)
+  ]);
+}
 ```
 
-## Integration with SocialFlow
-
-This implementation enables:
-1. **Smart Campaign Deployment** - Deploy campaign contracts automatically
-2. **Cost Estimation** - Calculate costs before campaign launch
-3. **Automated Rewards** - Execute reward distribution via smart contracts
-4. **Transparent Auditing** - Verify all operations on-chain
-
-See `campaignContractManager.ts` for integration examples.
-
-## Security Considerations
-- Private keys never exposed in logs or errors
-- Clear network selection (testnet vs mainnet)
-- Gas fee validation before submission
-- Input parameter validation
-- Transaction confirmation required
-
-## Documentation
-Comprehensive documentation available in `services/SOROBAN_IMPLEMENTATION.md` including:
-- Architecture overview
-- Usage examples
-- Error handling guide
-- Security best practices
-- Future enhancement suggestions
-
-## Dependencies Added
-- `@stellar/stellar-sdk` (v14.5.0) - Official Stellar SDK with Soroban support
-
-## Breaking Changes
-None - This is a new feature addition
-
 ## Next Steps
-After this PR is merged, the following can be implemented:
-1. UI components for contract deployment
-2. Campaign contract templates
-3. Real-time contract event monitoring
-4. Batch deployment capabilities
-5. Contract upgrade management
+1. Integrate with SocialFlow dashboard UI
+2. Create contract-specific wrappers for engagement campaigns
+3. Implement real-time event listeners
+4. Add transaction history tracking
+5. Build admin panel for contract deployment
 
-## Checklist
-- [x] Code implements all required functionality
-- [x] Tests validate implementation
-- [x] Documentation is comprehensive
-- [x] TypeScript types are properly defined
-- [x] Error handling is robust
-- [x] Integration examples provided
-- [x] Commit message follows conventions
-- [x] Branch created from correct base
-- [x] Ready for review
+## Files Changed
+- `package.json` - Added @stellar/stellar-sdk dependency
+- `src/blockchain/` - New directory with complete implementation
+  - services/ (SmartContractService, WalletService)
+  - types/ (TypeScript interfaces)
+  - config/ (Network configurations)
+  - utils/ (Helper functions)
+  - hooks/ (React integration)
+  - examples/ (Usage examples)
+  - components/ (Demo component)
+  - README.md (Documentation)
+  - TESTING.md (Test plan)
+  - index.ts (Centralized exports)
 
-## Review Notes
-- Implementation follows Stellar best practices
-- Uses official @stellar/stellar-sdk
-- Minimal, focused implementation per requirements
-- Well-documented for future maintainers
-- Ready for integration with UI components
+## Branch
+`features/issue-201-Soroban-Contract-Bridge`
+
+## Target Branch
+`develop`
+
+## Related Issues
+Closes #201
+
+---
+
+**Ready for Review** ✅
+
+All acceptance criteria met. Comprehensive documentation and examples included. No TypeScript errors. Ready to merge into develop branch.
