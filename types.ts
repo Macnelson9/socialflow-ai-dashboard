@@ -11,7 +11,7 @@ export enum View {
 export interface NavItem {
   id: View;
   label: string;
-  icon: React.ReactNode;
+  icon: any;
 }
 
 export interface ViewProps {
@@ -58,4 +58,20 @@ export enum Platform {
   YOUTUBE = 'youtube',
   LINKEDIN = 'linkedin',
   X = 'x'
+}
+
+export interface AnalyticsStorageSettings {
+  storageFrequency: 'daily' | 'weekly' | 'monthly' | 'manual';
+  autoStorage: boolean;
+  estimatedMonthlyCost: number;
+  storageHistory: StorageRecord[];
+}
+
+export interface StorageRecord {
+  id: string;
+  timestamp: Date;
+  dataSize: number;
+  transactionHash?: string;
+  cost: number;
+  status: 'pending' | 'completed' | 'failed';
 }
