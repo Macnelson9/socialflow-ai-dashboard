@@ -8,6 +8,7 @@ export enum View {
   SETTINGS = "SETTINGS",
   PORTFOLIO = "PORTFOLIO",
   TRANSACTION_HISTORY = "TRANSACTION_HISTORY",
+  ACCOUNT_PERFORMANCE = "ACCOUNT_PERFORMANCE",
 }
 
 export interface NavItem {
@@ -18,6 +19,17 @@ export interface NavItem {
 
 export interface ViewProps {
   onNavigate: (view: View) => void;
+}
+
+export interface MonetizationSettings {
+  enableTips: boolean;
+  payPerView: boolean;
+  subscriptionOnly: boolean;
+  tipAmount?: number;
+  accessPrice?: number;
+  selectedToken?: string;
+  ipfsMetadataHash?: string;
+  accessControlContract?: string;
 }
 
 export interface Post {
@@ -31,6 +43,7 @@ export interface Post {
     likes: number;
     views: number;
   };
+  monetization?: MonetizationSettings;
 }
 
 export interface Message {

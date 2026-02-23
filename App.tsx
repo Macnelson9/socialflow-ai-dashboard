@@ -10,6 +10,7 @@ import { Inbox } from "./components/Inbox";
 import { Settings } from "./components/Settings";
 import { PortfolioView } from "./components/blockchain/PortfolioView";
 import { TransactionHistory } from "./components/blockchain/TransactionHistory";
+import { AccountPerformance } from "./components/AccountPerformance";
 import { View } from "./types";
 
 const App: React.FC = () => {
@@ -35,6 +36,8 @@ const App: React.FC = () => {
         return <PortfolioView />;
       case View.TRANSACTION_HISTORY:
         return <TransactionHistory {...props} />;
+      case View.ACCOUNT_PERFORMANCE:
+        return <AccountPerformance {...props} />;
       case View.SETTINGS:
         return <Settings {...props} />;
       default:

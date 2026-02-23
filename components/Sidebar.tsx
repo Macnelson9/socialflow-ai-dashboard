@@ -22,6 +22,11 @@ const navItems: NavItem[] = [
     icon: <MaterialIcon name="bar_chart" />,
   },
   {
+    id: View.ACCOUNT_PERFORMANCE,
+    label: "Performance",
+    icon: <MaterialIcon name="monitoring" />,
+  },
+  {
     id: View.CALENDAR,
     label: "Calendar",
     icon: <MaterialIcon name="calendar_today" />,
@@ -74,11 +79,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             key={item.id}
             onClick={() => onNavigate(item.id)}
-            className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-200 group ${
-              currentView === item.id
+            className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-200 group ${currentView === item.id
                 ? "bg-primary-blue/10 text-primary-blue"
                 : "text-gray-subtext hover:text-white hover:bg-white/5"
-            }`}
+              }`}
           >
             <span
               className={`transition-colors ${currentView === item.id ? "text-primary-blue" : "text-gray-subtext group-hover:text-white"}`}
