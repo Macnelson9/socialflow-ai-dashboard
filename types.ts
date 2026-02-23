@@ -93,3 +93,46 @@ export enum WalletConnectionStatus {
   CONNECTED = 'CONNECTED',
   ERROR = 'ERROR'
 }
+
+// Notification Types
+export enum NotificationType {
+  PAYMENT = 'PAYMENT',
+  TRANSFER = 'TRANSFER',
+  CONTRACT = 'CONTRACT',
+  BALANCE_CHANGE = 'BALANCE_CHANGE',
+  TRANSACTION_FAILED = 'TRANSACTION_FAILED'
+}
+
+export enum NotificationPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
+}
+
+export interface NotificationTypeConfig {
+  enabled: boolean;
+  priority: NotificationPriority;
+  sound: boolean;
+  desktop: boolean;
+  email: boolean;
+}
+
+export interface QuietHours {
+  enabled: boolean;
+  startTime: string; // HH:mm format
+  endTime: string; // HH:mm format
+  days: number[]; // 0-6 (Sunday-Saturday)
+}
+
+export interface NotificationPreferences {
+  doNotDisturb: boolean;
+  quietHours: QuietHours;
+  types: {
+    [NotificationType.PAYMENT]: NotificationTypeConfig;
+    [NotificationType.TRANSFER]: NotificationTypeConfig;
+    [NotificationType.CONTRACT]: NotificationTypeConfig;
+    [NotificationType.BALANCE_CHANGE]: NotificationTypeConfig;
+    [NotificationType.TRANSACTION_FAILED]: NotificationTypeConfig;
+  };
+}
