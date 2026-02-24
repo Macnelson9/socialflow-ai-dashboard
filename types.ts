@@ -29,6 +29,13 @@ export interface Post {
     likes: number;
     views: number;
   };
+  // Blockchain promotion fields
+  isSponsored?: boolean;
+  sponsorshipTier?: 'basic' | 'premium' | 'enterprise';
+  sponsorshipAmount?: number;
+  transactionHash?: string;
+  promotionBudget?: number;
+  promotionStatus?: 'pending' | 'active' | 'completed' | 'failed';
 }
 
 export interface Message {
@@ -58,4 +65,31 @@ export enum Platform {
   YOUTUBE = 'youtube',
   LINKEDIN = 'linkedin',
   X = 'x'
+}
+
+// Blockchain payment types
+export interface WalletConnection {
+  isConnected: boolean;
+  publicKey?: string;
+  balance?: number;
+}
+
+export interface PaymentTransaction {
+  id: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'confirmed' | 'failed';
+  transactionHash?: string;
+  timestamp: Date;
+  postId: string;
+  sponsorshipTier: 'basic' | 'premium' | 'enterprise';
+}
+
+export interface SponsorshipTier {
+  id: 'basic' | 'premium' | 'enterprise';
+  name: string;
+  price: number;
+  features: string[];
+  duration: number; // hours
+  reach: string;
 }

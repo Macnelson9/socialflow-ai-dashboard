@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from './ui/Card';
-import { Platform, ViewProps, View } from '../types';
+import { PaymentModal } from './ui/PaymentModal';
+import { SponsoredBadge } from './ui/SponsoredBadge';
+import { Platform, ViewProps, View, PaymentTransaction } from '../types';
 import { generateCaption } from '../services/geminiService';
 import { SiInstagram, SiFacebook, SiLinkedin } from 'react-icons/si';
 import { FaXTwitter } from 'react-icons/fa6';
@@ -22,6 +24,9 @@ export const CreatePost: React.FC<ViewProps> = ({ onNavigate }) => {
   const [saveStatus, setSaveStatus] = useState('');
   const [scheduleDate, setScheduleDate] = useState('');
   const [scheduleTime, setScheduleTime] = useState('10:00');
+  const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
+  const [promotionTransaction, setPromotionTransaction] = useState<PaymentTransaction | null>(null);
+  const [isPromoted, setIsPromoted] = useState(false);
 
   const getTodayString = () => {
     const today = new Date();
@@ -115,11 +120,35 @@ export const CreatePost: React.FC<ViewProps> = ({ onNavigate }) => {
     if(button) button.innerText = "Scheduling...";
     
     setTimeout(() => {
-        console.log("Post scheduled:", { caption, selectedPlatforms, mediaFile, scheduleDate, scheduleTime });
+        console.log("Post scheduled:", { 
+          caption, 
+          selectedPlatforms, 
+          mediaFile, 
+          scheduleDate, 
+          scheduleTime,
+          isPromoted,
+          promotionTransaction 
+        });
         handleClearDraft();
         alert("Post scheduled successfully! Check console for details.");
         onNavigate(View.CALENDAR);
     }, 1000);
+  };
+
+  const handlePromotePost = () => {
+    if (!caption && !mediaFile) {
+      alert("Please add some content before promoting.");
+      return;
+    }
+    setIsPromotionModalOpen(true);
+  };
+
+  const handlePaymentComplete = (transaction: PaymentTransaction) => {
+    setPromotionTransaction(transaction);
+    setIsPromoted(true);
+    setIsPromotionModalOpen(false);
+    setSaveStatus('Post promoted successfully!');
+    setTimeout(() => setSaveStatus(''), 3000);
   };
 
   const handleTopicEdit = () => {
@@ -143,6 +172,26 @@ export const CreatePost: React.FC<ViewProps> = ({ onNavigate }) => {
                {saveStatus}
              </div>
            )}
+           {isPromoted && promotionTransaction && (
+             <div className="flex items-center gap-2">
+               <SponsoredBadge tier={promotionTransaction.sponsorshipTier} />
+               <span className="text-xs text-gray-400">
+                 Tx: {promotionTransaction.transactionHash?.slice(0, 8)}...
+               </span>
+             </div>
+           )}
+           <button 
+             onClick={handlePromotePost}
+             disabled={isPromoted}
+             className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-medium transition-all ${
+               isPromoted 
+                 ? 'bg-green-500/20 text-green-400 cursor-not-allowed' 
+                 : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 shadow-lg shadow-purple-500/20'
+             }`}
+           >
+             <MaterialIcon name={isPromoted ? "check_circle" : "campaign"} className="text-base" />
+             {isPromoted ? 'Promoted' : 'Promote Post'}
+           </button>
            <button 
              onClick={handleSaveDraft}
              className="text-gray-subtext hover:text-white text-sm font-medium px-4 py-2"
@@ -336,6 +385,13 @@ export const CreatePost: React.FC<ViewProps> = ({ onNavigate }) => {
           </Card>
         </div>
       </div>
+
+      <PaymentModal
+        isOpen={isPromotionModalOpen}
+        onClose={() => setIsPromotionModalOpen(false)}
+        onPaymentComplete={handlePaymentComplete}
+        postId={`post_${Date.now()}`}
+      />
     </div>
   );
 };
