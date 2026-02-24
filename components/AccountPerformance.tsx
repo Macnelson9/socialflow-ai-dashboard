@@ -16,6 +16,7 @@ import {
     Legend,
 } from 'recharts';
 import { analyticsService, AggregatedData } from '../services/analyticsService';
+import { PerformanceComparison } from './PerformanceComparison';
 
 const MaterialIcon = ({ name, className }: { name: string; className?: string }) => (
     <span className={`material-symbols-outlined ${className}`}>{name}</span>
@@ -166,6 +167,9 @@ export const AccountPerformance: React.FC<ViewProps> = () => {
                     isNegative
                 />
             </div>
+
+            {/* Performance Comparison */}
+            <PerformanceComparison timeRange={timeRange} />
 
             {/* Main Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
