@@ -1,11 +1,4 @@
-import '@testing-library/jest-dom';
-
-// Mock Material Icons
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
+// Jest setup file for additional configuration
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -21,3 +14,10 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: jest.fn(),
   })),
 });
+
+// Suppress console errors in tests (optional)
+global.console = {
+  ...console,
+  error: jest.fn(),
+  warn: jest.fn(),
+};

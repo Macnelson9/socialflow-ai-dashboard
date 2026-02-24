@@ -1,5 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification } = require('electron');
 const path = require('path');
+
+let eventMonitorBridge;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -21,6 +23,13 @@ function createWindow() {
     }
   });
 
+  // Initialize event monitor bridge
+  if (!eventMonitorBridge) {
+    const { EventMonitorBridge } = require('./EventMonitorBridge');
+    eventMonitorBridge = new EventMonitorBridge('https://horizon-testnet.stellar.org');
+  }
+  eventMonitorBridge.setMainWindow(win);
+
   // In development, load from Vite dev server
   if (!app.isPackaged) {
     win.loadURL('http://localhost:5173');
@@ -29,6 +38,8 @@ function createWindow() {
     // In production, load the built html
     win.loadFile(path.join(__dirname, '../dist/index.html'));
   }
+
+  return win;
 }
 
 app.whenReady().then(() => {
@@ -42,7 +53,22 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+  if (eventMonitorBridge) {
+    eventMonitorBridge.cleanup();
+  }
   if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+// Handle blockchain notifications
+ipcMain.on('blockchain-notification', (event, data) => {
+  if (Notification.isSupported()) {
+    const notification = new Notification({
+      title: data.title || 'Blockchain Alert',
+      body: data.body || 'New blockchain event detected',
+      urgency: data.severity === 'critical' ? 'critical' : 'normal'
+    });
+    notification.show();
   }
 });
