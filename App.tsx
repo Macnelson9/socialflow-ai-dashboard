@@ -11,6 +11,7 @@ import { Settings } from "./components/Settings";
 import { PortfolioView } from "./components/blockchain/PortfolioView";
 import { TransactionHistory } from "./components/blockchain/TransactionHistory";
 import { AccountPerformance } from "./components/AccountPerformance";
+import { ToastProvider } from "./contexts/ToastContext";
 import { View } from "./types";
 
 const App: React.FC = () => {
@@ -46,21 +47,23 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-dark-bg text-white font-sans overflow-hidden selection:bg-primary-blue/30">
-      <Sidebar currentView={currentView} onNavigate={setCurrentView} />
+    <ToastProvider>
+      <div className="flex h-screen bg-dark-bg text-white font-sans overflow-hidden selection:bg-primary-blue/30">
+        <Sidebar currentView={currentView} onNavigate={setCurrentView} />
 
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-        {/* Abstract Background Blobs */}
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary-blue/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-primary-teal/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+          {/* Abstract Background Blobs */}
+          <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary-blue/10 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-primary-teal/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <Header />
+          <Header />
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scroll-smooth">
-          {renderView()}
-        </main>
+          <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scroll-smooth">
+            {renderView()}
+          </main>
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   );
 };
 
