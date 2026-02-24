@@ -1,155 +1,197 @@
-# Pull Request: Issue #201.3 - Soroban Contract Bridge (Extended)/3
+# Pull Request: Soroban Contract Bridge (Issue #201)
 
-## Summary
-
-This PR implements the extended Soroban Contract Bridge functionality for the SocialFlow platform, specifically addressing requirements 201.7 and 201.8.
+## Overview
+This PR implements the Soroban Contract Bridge feature, enabling SocialFlow to interact with Stellar smart contracts for automated engagement distribution, budgeting treasuries, and public verification.
 
 ## Changes Made
 
-### 1. Contract State Queries (Requirement 201.7) ✅
+### Core Services
+- **SmartContractService** (`src/blockchain/services/SmartContractService.ts`)
+  - SorobanRpc.Server connection setup
+  - `invoke()` helper for contract calls (read-only and state-changing)
+  - Simulation before submission for resource usage estimation
+  - WASM deployment helper for admins
+  - Event parsing from transaction metadata
+  - Comprehensive error handling (out-of-gas, simulation failures, etc.)
 
-Implemented comprehensive contract state management:
-- **`getContractState(contractId)`**: Retrieves current contract state from Soroban RPC
-- **Storage Queries**: Queries contract storage entries via `getLedgerEntries` RPC method
-- **State Parsing**: Converts raw storage entries into structured JavaScript objects
-- **Caching with TTL**: Implements 60-second cache to reduce RPC calls
-- **State Change Notifications**: Event-driven architecture for real-time state updates
-- **Cache Management**: Methods to clear specific or all cached states
+- **WalletService** (`src/blockchain/services/WalletService.ts`)
+  - Integration with Freighter and Albedo wallets
+  - Non-custodial transaction signing
+  - Auto-detection of available wallets
+  - Network-aware signing
 
-### 2. Unit Tests (Requirement 201.8) ✅
+### Type Definitions
+- **soroban.ts** (`src/blockchain/types/soroban.ts`)
+  - ContractInvocationParams
+  - ContractSimulationResult
+  - ContractInvocationResult
+  - WasmDeploymentParams/Result
+  - Error type enums
 
-Comprehensive test suite covering all functionality:
-- **RPC Connection**: Health check tests for connection validation
-- **Contract Invocation**: Tests for both read and write operations
-- **Simulation**: Fee estimation and transaction simulation tests
-- **WASM Deployment**: Contract deployment with and without salt
-- **Event Parsing**: Parsing and formatting of contract events
-- **Error Handling**: 
-  - Out-of-gas scenarios
-  - Invalid parameter handling
-  - Unknown error cases
-- **State Queries**: Full coverage of caching, TTL, and notifications
+### Configuration
+- **soroban.config.ts** (`src/blockchain/config/soroban.config.ts`)
+  - Network configurations (Testnet, Mainnet, Futurenet)
+  - Default timeout and fee settings
 
-## Files Added
+### Utilities
+- **sorobanHelpers.ts** (`src/blockchain/utils/sorobanHelpers.ts`)
+  - ScVal conversion helpers (toScVal, fromScVal)
+  - Type-specific converters (u64, i64, address, symbol, etc.)
+  - Error parsing utilities
+  - XLM/stroops conversion
 
-```
-blockchain/
-├── services/
-│   └── SmartContractService.ts       # Core service implementation (200 lines)
-├── types/
-│   └── contract.ts                   # TypeScript interfaces
-├── __tests__/
-│   └── SmartContractService.test.ts  # Test suite (350+ lines, 25+ tests)
-├── examples.ts                       # Usage examples
-└── README.md                         # Documentation
+### React Integration
+- **useSorobanContract** (`src/blockchain/hooks/useSorobanContract.ts`)
+  - React hook for easy contract interactions
+  - Wallet connection management
+  - Read/write contract methods
+  - Simulation support
+  - Event fetching
 
-jest.config.js                        # Jest configuration
-```
+### Examples & Documentation
+- **contractUsage.ts** - Comprehensive usage examples
+- **SorobanDemo.tsx** - Interactive demo component
+- **README.md** - Complete API documentation
+- **TESTING.md** - Testing guide and acceptance criteria verification
 
-## Files Modified
+## Technical Implementation
 
-- `package.json`: Added Jest dependencies and test scripts
-
-## Test Coverage
-
-- **Total Tests**: 25+
-- **Coverage Target**: 80% (branches, functions, lines, statements)
-- **Test Categories**:
-  - RPC health checks (3 tests)
-  - Contract invocation (3 tests)
-  - Simulation & fees (3 tests)
-  - WASM deployment (3 tests)
-  - Event parsing (3 tests)
-  - Error handling (3 tests)
-  - State queries (7 tests)
-
-## Key Features
-
-### State Caching
-- Reduces RPC calls by 90%+ for frequently accessed contracts
-- Configurable TTL (default: 60 seconds)
-- Automatic cache invalidation
-
-### Event-Driven Architecture
+### 1. Read-Only Contract Calls
 ```typescript
-const unsubscribe = service.onStateChange(contractId, (newState) => {
-  // React to state changes
-});
+const result = await sorobanService.invoke(
+  { contractId, method: 'balance', args: [addressToScVal(userAddress)] },
+  sourceAccount,
+  ContractCallType.READ_ONLY
+);
 ```
+- No wallet signature required
+- Uses simulation only
+- Returns contract state immediately
 
-### Error Handling
-User-friendly error messages:
-- "Transaction out of gas"
-- "Invalid parameters"
-- Detailed error context
+### 2. State-Changing Calls
+```typescript
+const result = await sorobanService.invoke(
+  { contractId, method: 'transfer', args: [...] },
+  sourceAccount,
+  ContractCallType.STATE_CHANGING,
+  signTransaction
+);
+```
+- Simulates first to estimate resources
+- Triggers wallet signature popup
+- Submits transaction to network
+- Polls for confirmation
+- Parses events from transaction meta
 
-### Performance Optimizations
-- Connection pooling ready
-- Async/await throughout
-- Minimal memory footprint
+### 3. Resource Estimation
+- Automatic simulation before every state-changing call
+- Calculates CPU instructions and memory usage
+- Estimates minimum resource fee
+- Prepares transaction with proper limits
+
+### 4. Error Handling
+- **OUT_OF_GAS**: Resource limits exceeded
+- **SIMULATION_FAILED**: Pre-flight check failed
+- **TRANSACTION_FAILED**: Submission or execution failed
+- User-friendly error messages for each type
+
+### 5. Event Parsing
+- Extracts events from transaction meta XDR
+- Parses event type, topics, and values
+- Returns structured event data
+- Supports historical event queries
+
+## Acceptance Criteria ✅
+
+- [x] **Successful read-only contract call** - Implemented via `ContractCallType.READ_ONLY`
+- [x] **State-changing call triggers wallet signature** - Integrated with Freighter/Albedo
+- [x] **Correct handling of out-of-gas errors** - Specific error type and user-friendly messages
+- [x] **Event parsing from transaction metadata** - Full XDR parsing implementation
+- [x] **WASM deployment helper** - `deployWasm()` method for admins
 
 ## Testing
 
-Run tests with:
-```bash
-npm test
-npm run test:watch
-npm test -- --coverage
-```
+### Manual Testing
+1. Install Freighter or Albedo wallet
+2. Configure for Testnet
+3. Run the demo component
+4. Test read-only calls (no signature)
+5. Test state-changing calls (with signature)
+6. Verify error handling
+7. Check event parsing
 
-All tests pass ✅
-
-## Documentation
-
-- Comprehensive README with usage examples
-- Inline code documentation
-- TypeScript interfaces for type safety
-- 10 practical usage examples
-
-## Breaking Changes
-
-None - This is a new feature addition.
+### Automated Testing
+See `src/blockchain/TESTING.md` for comprehensive test plan
 
 ## Dependencies Added
+- `@stellar/stellar-sdk` - Official Stellar SDK with Soroban support
 
-- `jest`: ^29.5.0
-- `ts-jest`: ^29.1.0
-- `@types/jest`: ^29.5.0
-- `jest-environment-jsdom`: ^29.5.0
+## Security Considerations
+- ✅ Private keys never accessed by the service
+- ✅ All transaction signing delegated to wallet providers
+- ✅ Simulation performed before every state-changing call
+- ✅ Resource limits automatically calculated
+- ✅ Network passphrase validation
+
+## Usage Example
+
+```typescript
+import { useSorobanContract } from './blockchain/hooks/useSorobanContract';
+
+function MyComponent() {
+  const { 
+    connectWallet, 
+    readContract, 
+    writeContract 
+  } = useSorobanContract('CONTRACT_ID', 'TESTNET');
+
+  // Connect wallet
+  await connectWallet();
+
+  // Read contract state
+  const balance = await readContract('balance', [addressToScVal(address)]);
+
+  // Execute transaction
+  const result = await writeContract('transfer', [
+    addressToScVal(from),
+    addressToScVal(to),
+    u64ToScVal(amount)
+  ]);
+}
+```
 
 ## Next Steps
+1. Integrate with SocialFlow dashboard UI
+2. Create contract-specific wrappers for engagement campaigns
+3. Implement real-time event listeners
+4. Add transaction history tracking
+5. Build admin panel for contract deployment
 
-After merge, the following can be implemented:
-1. React hooks for UI integration
-2. Redux/Context state management
-3. UI components for contract interaction
-4. Real-time monitoring dashboard
+## Files Changed
+- `package.json` - Added @stellar/stellar-sdk dependency
+- `src/blockchain/` - New directory with complete implementation
+  - services/ (SmartContractService, WalletService)
+  - types/ (TypeScript interfaces)
+  - config/ (Network configurations)
+  - utils/ (Helper functions)
+  - hooks/ (React integration)
+  - examples/ (Usage examples)
+  - components/ (Demo component)
+  - README.md (Documentation)
+  - TESTING.md (Test plan)
+  - index.ts (Centralized exports)
 
-## Checklist
+## Branch
+`features/issue-201-Soroban-Contract-Bridge`
 
-- [x] Code follows project style guidelines
-- [x] All tests pass
-- [x] Documentation is complete
-- [x] No breaking changes
-- [x] TypeScript types are properly defined
-- [x] Error handling is comprehensive
-- [x] Examples are provided
-- [x] Branch created from develop
-- [x] Ready for PR against develop branch
+## Target Branch
+`develop`
 
 ## Related Issues
+Closes #201
 
-- Closes #201.3
-- Part of #54 (Soroban Contract Bridge Extended)
-- Implements requirements 201.7 and 201.8
+---
 
-## Screenshots/Demo
+**Ready for Review** ✅
 
-N/A - Backend service implementation with unit tests
-
-## Reviewer Notes
-
-- Focus on test coverage and error handling
-- State caching implementation is critical for performance
-- Event notification pattern allows for real-time UI updates
-- All RPC interactions are properly typed and tested
+All acceptance criteria met. Comprehensive documentation and examples included. No TypeScript errors. Ready to merge into develop branch.
