@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ViewProps } from '../types';
 import { identityService, VerificationStatus } from '../services/identityService';
 import { VerificationBadge } from './VerificationBadge';
+import { VerifyProfileSection } from './VerifyProfileSection';
 
 export const Settings: React.FC<ViewProps> = () => {
   // State for toggles (all enabled by default)
@@ -158,6 +159,9 @@ export const Settings: React.FC<ViewProps> = () => {
         <div>
           <h3 className="text-lg font-semibold text-gray-400 mb-4">Account</h3>
           <div className="space-y-3">
+            {/* Verify Profile Section */}
+            <VerifyProfileSection onVerifyClick={() => setShowVerificationModal(true)} />
+
             {/* Verification Section */}
             <div className="bg-[#1A1D1F] p-4 rounded-lg">
               <div className="flex justify-between items-center mb-2">
