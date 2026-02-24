@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification } = require('electron');
 const path = require('path');
 
 function createWindow() {
@@ -44,5 +44,17 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+// Handle blockchain notifications
+ipcMain.on('blockchain-notification', (event, data) => {
+  if (Notification.isSupported()) {
+    const notification = new Notification({
+      title: data.title || 'Blockchain Alert',
+      body: data.body || 'New blockchain event detected',
+      urgency: data.severity === 'critical' ? 'critical' : 'normal'
+    });
+    notification.show();
   }
 });

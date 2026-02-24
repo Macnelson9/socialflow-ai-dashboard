@@ -9,5 +9,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
     }
+  },
+  sendNotification: (data) => {
+    ipcRenderer.send('blockchain-notification', data);
   }
 });
