@@ -4,6 +4,8 @@ const blockchainMonitor = require('./blockchainMonitor');
 
 let mainWindow = null;
 
+let eventMonitorBridge;
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1400,

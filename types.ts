@@ -1,4 +1,13 @@
 export enum View {
+  DASHBOARD = 'DASHBOARD',
+  ANALYTICS = 'ANALYTICS',
+  CALENDAR = 'CALENDAR',
+  CREATE_POST = 'CREATE_POST',
+  MEDIA_LIBRARY = 'MEDIA_LIBRARY',
+  INBOX = 'INBOX',
+  SETTINGS = 'SETTINGS',
+  BLOCKCHAIN_MONITOR = 'BLOCKCHAIN_MONITOR',
+  TRANSACTION_HISTORY = 'TRANSACTION_HISTORY'
   DASHBOARD = "DASHBOARD",
   ANALYTICS = "ANALYTICS",
   CALENDAR = "CALENDAR",
@@ -14,11 +23,23 @@ export enum View {
 export interface NavItem {
   id: View;
   label: string;
-  icon: React.ReactNode;
+  icon: any;
 }
 
 export interface ViewProps {
   onNavigate: (view: View) => void;
+}
+51
+
+export interface MonetizationSettings {
+  enableTips: boolean;
+  payPerView: boolean;
+  subscriptionOnly: boolean;
+  tipAmount?: number;
+  accessPrice?: number;
+  selectedToken?: string;
+  ipfsMetadataHash?: string;
+  accessControlContract?: string;
 }
 
 export interface Post {
@@ -32,6 +53,7 @@ export interface Post {
     likes: number;
     views: number;
   };
+  monetization?: MonetizationSettings;
 }
 
 export interface Message {
