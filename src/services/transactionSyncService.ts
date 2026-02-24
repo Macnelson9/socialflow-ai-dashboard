@@ -1,8 +1,7 @@
 import { Horizon } from '@stellar/stellar-sdk';
 import { transactionDB, TransactionRecord } from './transactionDB';
 
-const Server = Horizon.Server;
-type ServerApi = Horizon.HorizonApi;
+type HorizonServer = Horizon.Server;
 
 export enum SyncStatus {
   IDLE = 'idle',
@@ -19,7 +18,7 @@ interface SyncState {
 }
 
 class TransactionSyncService {
-  private server: Server;
+  private server: HorizonServer;
   private syncState: SyncState = {
     status: SyncStatus.IDLE,
     totalSynced: 0,
@@ -27,7 +26,7 @@ class TransactionSyncService {
   private listeners: Set<(state: SyncState) => void> = new Set();
 
   constructor(horizonUrl: string = 'https://horizon-testnet.stellar.org') {
-    this.server = new Server(horizonUrl);
+    this.server = new Horizon.Server(horizonUrl);
   }
 
   getSyncState(): SyncState {
