@@ -29,3 +29,4 @@ export const MetricsTracker: FC<MetricsTrackerProps> = ({ promotion }) => {
     </div>
   );
 };
+
