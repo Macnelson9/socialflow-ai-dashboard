@@ -34,6 +34,9 @@ describe('Promotion Blockchain Integration (402.8)', () => {
     expect(screen.queryByTestId('badge')).toBeNull();
   });
 
+
+  
+
   it('shows an error message if the refund transaction fails', async () => {
   // Simulate a blockchain rejection
   blockchainService.updateStatus.mockRejectedValueOnce(new Error("Insufficient Sequence"));
