@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card } from './ui/Card';
+import { NotificationSettings } from './NotificationSettings';
+import { NotificationHistory } from './NotificationHistory';
+import { useBlockchainUpdates } from '../src/hooks/useBlockchainUpdates';
 
 interface BlockchainEvent {
   id: string;
@@ -7,6 +10,12 @@ interface BlockchainEvent {
   timestamp: string;
   account: string;
   data: any;
+}
+
+interface UIUpdateIndicator {
+  type: 'balance' | 'transaction' | 'nft' | 'campaign';
+  message: string;
+  timestamp: number;
 }
 
 declare global {
@@ -17,6 +26,12 @@ declare global {
         stopMonitoring: () => Promise<{ success: boolean; error?: string }>;
         onEvents: (callback: (events: BlockchainEvent[]) => void) => () => void;
       };
+      notifications: {
+        getPreferences: () => Promise<any>;
+        setPreferences: (prefs: any) => Promise<void>;
+        getHistory: () => Promise<any[]>;
+        clearHistory: () => Promise<void>;
+      };
     };
   }
 }
@@ -26,6 +41,31 @@ export default function BlockchainMonitor() {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [events, setEvents] = useState<BlockchainEvent[]>([]);
   const [error, setError] = useState('');
+  const [updateIndicators, setUpdateIndicators] = useState<UIUpdateIndicator[]>([]);
+
+  useBlockchainUpdates({
+    onPayment: (event) => {
+      addUpdateIndicator('balance', `Balance updated: +${event.data.amount} ${event.data.asset}`);
+      addUpdateIndicator('transaction', 'New payment received');
+    },
+    onTokenTransfer: (event) => {
+      addUpdateIndicator('transaction', 'Token transfer detected');
+    },
+    onNFTTransfer: (event) => {
+      addUpdateIndicator('nft', 'NFT gallery updated');
+    },
+    onContractExecution: (event) => {
+      addUpdateIndicator('campaign', 'Campaign metrics refreshed');
+    },
+  });
+
+  const addUpdateIndicator = (type: UIUpdateIndicator['type'], message: string) => {
+    const indicator: UIUpdateIndicator = { type, message, timestamp: Date.now() };
+    setUpdateIndicators((prev) => [indicator, ...prev].slice(0, 10));
+    setTimeout(() => {
+      setUpdateIndicators((prev) => prev.filter((i) => i.timestamp !== indicator.timestamp));
+    }, 5000);
+  };
 
   useEffect(() => {
     if (!window.electronAPI?.blockchain) return;
@@ -69,7 +109,7 @@ export default function BlockchainMonitor() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-6">
       <Card className="p-6">
         <h2 className="text-xl font-bold mb-4">Blockchain Event Monitor</h2>
         
@@ -110,6 +150,24 @@ export default function BlockchainMonitor() {
           )}
         </div>
       </Card>
+
+      {updateIndicators.length > 0 && (
+        <Card className="p-4 bg-blue-900/20 border-blue-500">
+          <h4 className="text-sm font-bold mb-2">🔄 Real-time Updates</h4>
+          <div className="space-y-1">
+            {updateIndicators.map((indicator) => (
+              <div key={indicator.timestamp} className="text-sm text-blue-300 animate-pulse">
+                <span className="font-semibold">[{indicator.type.toUpperCase()}]</span> {indicator.message}
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <NotificationSettings />
+        <NotificationHistory />
+      </div>
 
       <Card className="p-6">
         <h3 className="text-lg font-bold mb-4">Recent Events ({events.length})</h3>

@@ -14,5 +14,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on('blockchain:events', (_, events) => callback(events));
       return () => ipcRenderer.removeAllListeners('blockchain:events');
     }
+  },
+  notifications: {
+    getPreferences: () => ipcRenderer.invoke('notifications:get-preferences'),
+    setPreferences: (prefs) => ipcRenderer.invoke('notifications:set-preferences', prefs),
+    getHistory: () => ipcRenderer.invoke('notifications:get-history'),
+    clearHistory: () => ipcRenderer.invoke('notifications:clear-history'),
   }
 });
