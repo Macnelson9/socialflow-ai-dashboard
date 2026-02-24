@@ -8,6 +8,7 @@ import { CreatePost } from './components/CreatePost';
 import { MediaLibrary } from './components/MediaLibrary';
 import { Inbox } from './components/Inbox';
 import { Settings } from './components/Settings';
+import { RewardsDemo } from './components/blockchain/RewardsDemo';
 import BlockchainMonitor from './components/BlockchainMonitor';
 import { TransactionHistory } from './components/TransactionHistory';
 import { View } from './types';
@@ -43,6 +44,7 @@ const App: React.FC = () => {
       case View.CREATE_POST: return <CreatePost {...props} />;
       case View.MEDIA_LIBRARY: return <MediaLibrary {...props} />;
       case View.INBOX: return <Inbox {...props} />;
+      case View.REWARDS: return <RewardsDemo />;
       case View.SETTINGS: return <Settings {...props} />;
       case View.BLOCKCHAIN_MONITOR: return <BlockchainMonitor />;
       case View.TRANSACTION_HISTORY: return <TransactionHistory />;
