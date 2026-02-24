@@ -12,11 +12,16 @@ export function TransactionDetailModal({ transaction, onClose }: TransactionDeta
   const stellarExpertUrl = `https://stellar.expert/explorer/testnet/tx/${transaction.id}`;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-gray-900 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-gray-900 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-start mb-4">
           <h2 className="text-xl font-bold">Transaction Details</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+          <button 
+            onClick={onClose} 
+            className="text-gray-400 hover:text-white text-2xl leading-none hover:bg-gray-800 rounded px-2"
+          >
+            &times;
+          </button>
         </div>
 
         <div className="space-y-4">
