@@ -9,6 +9,8 @@ import {
   CATEGORY_COLORS,
   CATEGORY_LABELS 
 } from '../src/utils/transactionUtils';
+import { searchTransactions, generateSearchSuggestions, highlightMatch } from '../src/utils/searchUtils';
+import { TransactionDetailModal } from './TransactionDetailModal';
 
 export function TransactionHistory() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -17,6 +19,9 @@ export function TransactionHistory() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
   useEffect(() => {
     if (!window.electronAPI?.blockchain) return;
@@ -44,6 +49,12 @@ export function TransactionHistory() {
   useEffect(() => {
     let filtered = [...transactions];
 
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const searchResults = searchTransactions(filtered, searchQuery);
+      filtered = searchResults.map(r => r.transaction);
+    }
+
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(tx => tx.category === selectedCategory);
     }
@@ -57,8 +68,9 @@ export function TransactionHistory() {
     }
 
     setFilteredTxs(filtered);
-  }, [transactions, selectedCategory, startDate, endDate]);
+  }, [transactions, selectedCategory, startDate, endDate, searchQuery]);
 
+  const suggestions = generateSearchSuggestions(transactions);
   const stats = calculateCategoryStats(transactions);
 
   const handleCategoryChange = (txId: string, category: TransactionCategory) => {
@@ -169,6 +181,34 @@ export function TransactionHistory() {
           ))}
         </div>
 
+        {/* Search */}
+        <div className="mb-4 relative">
+          <label className="block text-sm mb-2">🔍 Search Transactions</label>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            placeholder="Search by hash, address, or memo..."
+            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded"
+          />
+          {showSuggestions && suggestions.length > 0 && searchQuery.length < 3 && (
+            <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-700 rounded shadow-lg">
+              <div className="text-xs text-gray-400 px-3 py-2 border-b border-gray-700">Suggestions:</div>
+              {suggestions.map((suggestion, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setSearchQuery(suggestion)}
+                  className="px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm"
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div>
@@ -233,7 +273,11 @@ export function TransactionHistory() {
             <p className="text-gray-400 text-center py-8">No transactions found</p>
           ) : (
             filteredTxs.map((tx) => (
-              <div key={tx.id} className="p-4 bg-gray-800 rounded border border-gray-700">
+              <div 
+                key={tx.id} 
+                className="p-4 bg-gray-800 rounded border border-gray-700 hover:border-blue-500 cursor-pointer transition-colors"
+                onClick={() => setSelectedTx(tx)}
+              >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${CATEGORY_COLORS[tx.category]}`} />
@@ -254,13 +298,23 @@ export function TransactionHistory() {
                   {tx.from && (
                     <div>
                       <span className="text-gray-400">From:</span>{' '}
-                      <span className="font-mono text-xs">{tx.from.slice(0, 8)}...</span>
+                      <span 
+                        className="font-mono text-xs"
+                        dangerouslySetInnerHTML={{ 
+                          __html: highlightMatch(tx.from.slice(0, 8) + '...', searchQuery) 
+                        }}
+                      />
                     </div>
                   )}
                   {tx.to && (
                     <div>
                       <span className="text-gray-400">To:</span>{' '}
-                      <span className="font-mono text-xs">{tx.to.slice(0, 8)}...</span>
+                      <span 
+                        className="font-mono text-xs"
+                        dangerouslySetInnerHTML={{ 
+                          __html: highlightMatch(tx.to.slice(0, 8) + '...', searchQuery) 
+                        }}
+                      />
                     </div>
                   )}
                 </div>
@@ -269,7 +323,11 @@ export function TransactionHistory() {
                   <label className="text-xs text-gray-400">Category:</label>
                   <select
                     value={tx.category}
-                    onChange={(e) => handleCategoryChange(tx.id, e.target.value as TransactionCategory)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleCategoryChange(tx.id, e.target.value as TransactionCategory);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
                     className="px-2 py-1 bg-gray-700 border border-gray-600 rounded text-xs"
                   >
                     {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
@@ -282,6 +340,8 @@ export function TransactionHistory() {
           )}
         </div>
       </Card>
+
+      <TransactionDetailModal transaction={selectedTx} onClose={() => setSelectedTx(null)} />
     </div>
   );
 }
