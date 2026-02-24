@@ -5,7 +5,8 @@ export enum View {
   CREATE_POST = 'CREATE_POST',
   MEDIA_LIBRARY = 'MEDIA_LIBRARY',
   INBOX = 'INBOX',
-  SETTINGS = 'SETTINGS'
+  SETTINGS = 'SETTINGS',
+  TRANSACTIONS = 'TRANSACTIONS'
 }
 
 export interface NavItem {
@@ -58,4 +59,31 @@ export enum Platform {
   YOUTUBE = 'youtube',
   LINKEDIN = 'linkedin',
   X = 'x'
+}
+
+export interface Transaction {
+  id: string;
+  type: 'post' | 'comment' | 'like' | 'share' | 'follow' | 'message' | 'campaign' | 'payment';
+  platform: Platform;
+  description: string;
+  timestamp: Date;
+  status: 'pending' | 'completed' | 'failed';
+  metadata?: {
+    userId?: string;
+    amount?: number;
+    postId?: string;
+    [key: string]: any;
+  };
+  isNew?: boolean;
+}
+
+export interface TransactionFilter {
+  type?: Transaction['type'][];
+  platform?: Platform[];
+  status?: Transaction['status'][];
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  searchQuery?: string;
 }
