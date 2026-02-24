@@ -1,3 +1,16 @@
+import React, { useState } from 'react';
+import { Sidebar } from './components/Sidebar';
+import { Header } from './components/Header';
+import { Dashboard } from './components/Dashboard';
+import { Analytics } from './components/Analytics';
+import { Calendar } from './components/Calendar';
+import { CreatePost } from './components/CreatePost';
+import { MediaLibrary } from './components/MediaLibrary';
+import { Inbox } from './components/Inbox';
+import { Settings } from './components/Settings';
+import BlockchainMonitor from './components/BlockchainMonitor';
+import { TransactionHistory } from './components/TransactionHistory';
+import { View } from './types';
 import React, { useState } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
@@ -24,6 +37,16 @@ const App: React.FC = () => {
     const props = { onNavigate: setCurrentView };
 
     switch (currentView) {
+      case View.DASHBOARD: return <Dashboard {...props} />;
+      case View.ANALYTICS: return <Analytics {...props} />;
+      case View.CALENDAR: return <Calendar {...props} />;
+      case View.CREATE_POST: return <CreatePost {...props} />;
+      case View.MEDIA_LIBRARY: return <MediaLibrary {...props} />;
+      case View.INBOX: return <Inbox {...props} />;
+      case View.SETTINGS: return <Settings {...props} />;
+      case View.BLOCKCHAIN_MONITOR: return <BlockchainMonitor />;
+      case View.TRANSACTION_HISTORY: return <TransactionHistory />;
+      default: return <Dashboard {...props} />;
       case View.DASHBOARD:
         return <Dashboard {...props} />;
       case View.ANALYTICS:
