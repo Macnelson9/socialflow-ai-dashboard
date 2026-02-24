@@ -7,18 +7,68 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.send(channel, data);
     }
   },
+
+  // Blockchain monitoring API
   blockchain: {
-    startMonitoring: (accountId) => ipcRenderer.invoke('blockchain:start-monitoring', accountId),
-    stopMonitoring: () => ipcRenderer.invoke('blockchain:stop-monitoring'),
-    onEvents: (callback) => {
-      ipcRenderer.on('blockchain:events', (_, events) => callback(events));
-      return () => ipcRenderer.removeAllListeners('blockchain:events');
+    // Start monitoring an account
+    startMonitoring: (publicKey) => {
+      ipcRenderer.send('blockchain:start-monitoring', { publicKey });
+    },
+
+    // Stop monitoring an account
+    stopMonitoring: (publicKey) => {
+      ipcRenderer.send('blockchain:stop-monitoring', { publicKey });
+    },
+
+    // Get list of monitored accounts
+    getMonitoredAccounts: () => {
+      return ipcRenderer.invoke('blockchain:get-monitored-accounts');
+    },
+
+    // Get active streams count
+    getActiveStreams: () => {
+      return ipcRenderer.invoke('blockchain:get-active-streams');
+    },
+
+    // Listen for payment events
+    onPayment: (callback) => {
+      const listener = (event, data) => callback(data);
+      ipcRenderer.on('blockchain:payment', listener);
+      
+      // Return cleanup function
+      return () => {
+        ipcRenderer.removeListener('blockchain:payment', listener);
+      };
+    },
+
+    // Listen for operation events
+    onOperation: (callback) => {
+      const listener = (event, data) => callback(data);
+      ipcRenderer.on('blockchain:operation', listener);
+      
+      return () => {
+        ipcRenderer.removeListener('blockchain:operation', listener);
+      };
+    },
+
+    // Listen for balance update notifications
+    onBalanceUpdateNeeded: (callback) => {
+      const listener = (event, data) => callback(data);
+      ipcRenderer.on('blockchain:balance-update-needed', listener);
+      
+      return () => {
+        ipcRenderer.removeListener('blockchain:balance-update-needed', listener);
+      };
+    },
+
+    // Listen for errors
+    onError: (callback) => {
+      const listener = (event, data) => callback(data);
+      ipcRenderer.on('blockchain:error', listener);
+      
+      return () => {
+        ipcRenderer.removeListener('blockchain:error', listener);
+      };
     }
-  },
-  notifications: {
-    getPreferences: () => ipcRenderer.invoke('notifications:get-preferences'),
-    setPreferences: (prefs) => ipcRenderer.invoke('notifications:set-preferences', prefs),
-    getHistory: () => ipcRenderer.invoke('notifications:get-history'),
-    clearHistory: () => ipcRenderer.invoke('notifications:clear-history'),
   }
 });
