@@ -1,186 +1,186 @@
-# Soroban Contract Bridge - Event Parsing & Templates
+# Stellar Wallet Integration
 
-## Overview
+This module provides a comprehensive wallet integration service for Stellar blockchain, supporting multiple wallet providers with session management and security features.
 
-This implementation provides comprehensive contract event parsing and pre-built contract templates for the SocialFlow Stellar/Soroban integration.
+## Features
 
-## Features Implemented
-
-### ✅ 201.5 Contract Event Parsing
-
-- **Parse execution events from transaction meta**: Extract events from Stellar transaction XDR
-- **Extract event data and topics**: Parse SCVal data structures to native JavaScript types
-- **Map events to typed structures**: Type-safe event interfaces with TypeScript
-- **Add event filtering by type**: Filter by predefined event types (rewards, milestones, referrals, etc.)
-- **Store events in local database**: IndexedDB storage with indexed queries
-
-### ✅ 201.6 Contract Templates
-
-- **Pre-built contract templates**: 3 production-ready templates
-- **Engagement Rewards Template**: Reward users for likes, comments, shares
-- **Referral Program Template**: Incentivize user referrals
-- **Milestone Bonus Template**: Reward follower/engagement milestones
-- **WASM hash storage**: Each template includes deployment hash
-- **Configurable parameters**: Type-safe parameter definitions with defaults
+- **Multi-Wallet Support**: Freighter and Albedo wallet providers
+- **Session Persistence**: Encrypted session storage with auto-reconnect
+- **Security**: 30-minute inactivity timeout with activity tracking
+- **Provider Detection**: Automatic detection of installed wallet extensions
+- **Transaction Signing**: Support for transaction and auth entry signing
+- **Error Handling**: Comprehensive error handling with typed exceptions
 
 ## Architecture
 
 ```
 src/blockchain/
 ├── types/
-│   └── contract.ts              # TypeScript interfaces for events and templates
-├── config/
-│   └── contractTemplates.ts     # Pre-built contract template definitions
-├── utils/
-│   └── eventParser.ts           # Event parsing logic from transaction meta
+│   └── wallet.ts              # Type definitions and interfaces
 ├── services/
-│   ├── EventStorageService.ts   # IndexedDB storage for events
-│   └── SmartContractService.ts  # High-level contract interaction API
-└── index.ts                     # Public exports
+│   ├── providers/
+│   │   ├── FreighterProvider.ts   # Freighter wallet implementation
+│   │   └── AlbedoProvider.ts      # Albedo wallet implementation
+│   ├── WalletService.ts           # Main orchestrator service
+│   └── __tests__/
+│       └── WalletService.test.ts  # Unit tests
+└── README.md
 ```
 
 ## Usage
 
-### 1. Contract Templates
+### Basic Connection
 
 ```typescript
-import { CONTRACT_TEMPLATES, getTemplateById, getTemplatesByType } from './blockchain';
+import { walletService } from './blockchain/services/WalletService';
 
-// Get all templates
-console.log(CONTRACT_TEMPLATES);
+// Get available wallet providers
+const providers = walletService.getAvailableProviders();
+console.log('Available wallets:', providers);
 
-// Get specific template
-const template = getTemplateById('engagement-rewards-v1');
-
-// Get templates by type
-const referralTemplates = getTemplatesByType('referral_program');
-```
-
-### 2. Process Transaction Events
-
-```typescript
-import { smartContractService } from './blockchain';
-
-// Process a transaction and extract events
-const events = await smartContractService.processTransaction(
-  transactionHash,
-  transactionMeta,  // Base64 XDR from Stellar
-  contractId,
-  ledgerNumber
-);
-
-console.log(`Extracted ${events.length} events`);
-```
-
-### 3. Query Events
-
-```typescript
-// Get events for specific contract
-const contractEvents = await smartContractService.getContractEvents(contractId);
-
-// Get events by type
-const rewardEvents = await smartContractService.getEventsByType(
-  ContractEventType.REWARD_DISTRIBUTED
-);
-
-// Get recent events
-const recent = await smartContractService.getRecentEvents(50);
-```
-
-### 4. Parse Specific Event Types
-
-```typescript
-// Parse reward distribution events
-const rewards = smartContractService.parseRewardEvents(events);
-rewards.forEach(reward => {
-  console.log(`${reward.recipient} received ${reward.amount} ${reward.token}`);
-});
-
-// Parse milestone events
-const milestones = smartContractService.parseMilestoneEvents(events);
-
-// Parse referral events
-const referrals = smartContractService.parseReferralEvents(events);
-```
-
-### 5. Event Statistics
-
-```typescript
-const stats = await smartContractService.getEventStats(contractId);
-console.log(`Total events: ${stats.total}`);
-console.log('By type:', stats.byType);
-```
-
-## Event Types
-
-```typescript
-enum ContractEventType {
-  REWARD_DISTRIBUTED = 'reward_distributed',
-  CAMPAIGN_CREATED = 'campaign_created',
-  CAMPAIGN_COMPLETED = 'campaign_completed',
-  MILESTONE_REACHED = 'milestone_reached',
-  REFERRAL_REGISTERED = 'referral_registered',
-  ENGAGEMENT_RECORDED = 'engagement_recorded',
+// Connect to Freighter on testnet
+try {
+  const connection = await walletService.connectWallet('Freighter', 'TESTNET');
+  console.log('Connected:', connection.publicKey);
+} catch (error) {
+  if (error instanceof WalletException) {
+    console.error('Wallet error:', error.code, error.message);
+  }
 }
 ```
 
-## Contract Templates
+### Session Management
 
-### 1. Engagement Rewards
-- **Purpose**: Automatically reward users for social engagement
-- **Parameters**: 
-  - `reward_token`: Token address for rewards
-  - `like_reward`: Amount per like (default: 10)
-  - `comment_reward`: Amount per comment (default: 25)
-  - `share_reward`: Amount per share (default: 50)
-  - `max_rewards_per_user`: Maximum per user (default: 1000)
+```typescript
+// On app startup, try to restore previous session
+const restored = await walletService.loadSession();
+if (restored) {
+  console.log('Session restored');
+  const connection = walletService.getActiveConnection();
+  console.log('Connected as:', connection?.publicKey);
+}
+```
 
-### 2. Referral Program
-- **Purpose**: Reward users for referring new followers
-- **Parameters**:
-  - `reward_token`: Token address
-  - `referrer_reward`: Reward for referrer (default: 100)
-  - `referee_reward`: Reward for new user (default: 50)
-  - `min_engagement_threshold`: Minimum engagement (default: 5)
-  - `max_referrals_per_user`: Maximum referrals (default: 50)
+### Transaction Signing
 
-### 3. Milestone Bonus
-- **Purpose**: Reward follower/engagement milestones
-- **Parameters**:
-  - `reward_token`: Token address
-  - `milestone_1k`: Reward for 1K followers (default: 1000)
-  - `milestone_10k`: Reward for 10K followers (default: 10000)
-  - `milestone_100k`: Reward for 100K followers (default: 100000)
-  - `milestone_1m`: Reward for 1M followers (default: 1000000)
-  - `auto_distribute`: Auto-distribute on milestone (default: true)
+```typescript
+// Sign a transaction
+try {
+  const result = await walletService.signTransaction(transactionXDR);
+  console.log('Signed XDR:', result.signedXDR);
+  
+  // Submit to Stellar network...
+} catch (error) {
+  if (error instanceof WalletException) {
+    if (error.code === WalletError.USER_REJECTED) {
+      console.log('User rejected the transaction');
+    }
+  }
+}
+```
 
-## Storage
+### Switching Wallets
 
-Events are stored in IndexedDB with the following indexes:
-- `contractId`: Query events by contract
-- `type`: Query events by type
-- `timestamp`: Query events chronologically
-- `transactionHash`: Query events by transaction
+```typescript
+// Switch from Freighter to Albedo
+await walletService.switchWallet('Albedo', 'PUBLIC');
+```
 
-## Dependencies
+### Disconnect
 
-- `@stellar/stellar-sdk`: Stellar SDK for XDR parsing and SCVal conversion
-- IndexedDB: Browser-native storage (no external dependencies)
+```typescript
+// Disconnect and clear session
+await walletService.disconnectWallet();
+```
+
+## Wallet Providers
+
+### Freighter
+
+Freighter is a browser extension wallet for Stellar. Users need to install it from [freighter.app](https://freighter.app).
+
+**Features:**
+- Browser extension (Chrome, Firefox, Edge)
+- Secure key storage
+- Transaction signing
+- Network selection
+
+### Albedo
+
+Albedo is a web-based wallet that doesn't require installation. It uses an intent-based API.
+
+**Features:**
+- No installation required
+- Works in any browser
+- Account selection
+- Message signing
+
+## Security Features
+
+### Session Timeout
+- Automatic disconnect after 30 minutes of inactivity
+- Activity tracking on all wallet operations
+- Session refresh on user interactions
+
+### Session Encryption
+- Session data encrypted in localStorage
+- Only stores provider name and public key
+- Never stores private keys
+
+### Error Handling
+- Typed error codes for different failure scenarios
+- User rejection detection
+- Provider availability checks
+
+## Error Codes
+
+```typescript
+enum WalletError {
+  NOT_INSTALLED = 'WALLET_NOT_INSTALLED',
+  USER_REJECTED = 'USER_REJECTED',
+  CONNECTION_FAILED = 'CONNECTION_FAILED',
+  SIGNING_FAILED = 'SIGNING_FAILED',
+  SESSION_EXPIRED = 'SESSION_EXPIRED',
+  INVALID_NETWORK = 'INVALID_NETWORK',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR'
+}
+```
 
 ## Testing
 
-See `examples/contractEventsExample.ts` for comprehensive usage examples.
+Run the test suite:
 
-## Requirements Satisfied
+```bash
+npm test -- WalletService.test.ts
+```
 
-- ✅ **5.3**: Pre-built contract templates with WASM hashes
-- ✅ **5.4**: Contract event parsing from transaction meta
-- ✅ **5.5**: Event filtering, mapping, and storage
+Tests cover:
+- Provider detection and registration
+- Connection flows for each provider
+- Session persistence and restoration
+- Timeout and security features
+- Transaction and auth entry signing
+- Error handling scenarios
 
-## Next Steps
+## Requirements Mapping
 
-1. Integrate with actual Stellar Horizon/Soroban RPC endpoints
-2. Add real-time event monitoring via WebSocket
-3. Implement contract deployment from templates
-4. Add event notification system
-5. Create UI components for event visualization
+- **1.1**: Wallet type definitions and interfaces ✓
+- **1.2**: Freighter wallet provider ✓
+- **1.3**: Albedo wallet provider ✓
+- **1.4**: WalletService orchestrator ✓
+- **1.5**: Session persistence ✓
+- **1.6**: Session timeout and security ✓
+- **1.7**: Unit tests ✓
+- **15.2**: Multi-wallet support ✓
+- **15.3**: Activity tracking ✓
+- **15.4**: Automatic timeout ✓
+- **15.5**: Encrypted storage ✓
+
+## Future Enhancements
+
+- Add more wallet providers (xBull, Rabet)
+- Implement proper encryption library (crypto-js)
+- Add hardware wallet support
+- Implement wallet connection UI components
+- Add network switching functionality
+- Implement transaction history tracking

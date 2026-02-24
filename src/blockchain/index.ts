@@ -1,5 +1,33 @@
-export { ContractEventParser } from './utils/eventParser';
-export { EventStorageService, eventStorage } from './services/EventStorageService';
-export { SmartContractService, smartContractService } from './services/SmartContractService';
-export { CONTRACT_TEMPLATES, getTemplateById, getTemplatesByType } from './config/contractTemplates';
-export * from './types/contract';
+/**
+ * Blockchain Module Entry Point
+ * Exports wallet services, smart contract services, and event parsing
+ */
+
+// Wallet Types & Services
+export type {
+  NetworkType,
+  WalletProvider,
+  WalletProviderMetadata,
+  WalletConnection,
+  WalletSession,
+  SignTransactionResult,
+  SignAuthEntryResult,
+  WalletError,
+  WalletException
+} from './types/wallet';
+
+export { WalletService, walletService } from './services/WalletService';
+export { FreighterProvider } from './services/providers/FreighterProvider';
+export { AlbedoProvider } from './services/providers/AlbedoProvider';
+
+// Smart Contract & Soroban Services
+export { SmartContractService, sorobanService } from './services/SmartContractService';
+export type {
+  ContractInvocationParams,
+  ContractSimulationResult,
+  ContractInvocationResult,
+  WasmDeploymentParams,
+  WasmDeploymentResult,
+  SorobanConfig,
+  ContractCallType,
+} from './types/soroban';
