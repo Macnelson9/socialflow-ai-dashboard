@@ -1,18 +1,16 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  roots: ['<rootDir>'],
+  roots: ['<rootDir>/src', '<rootDir>/components'],
   testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   collectCoverageFrom: [
-    'services/**/*.{ts,tsx}',
+    'src/**/*.{ts,tsx}',
     'components/**/*.{ts,tsx}',
-    'contexts/**/*.{ts,tsx}',
-    'hooks/**/*.{ts,tsx}',
-    '!**/*.d.ts',
-    '!**/__tests__/**',
-    '!**/examples/**',
-    '!**/node_modules/**'
+    '!src/**/*.d.ts',
+    '!src/**/__tests__/**',
+    '!src/**/examples/**',
+    '!components/**/__tests__/**'
   ],
   coverageThreshold: {
     global: {
@@ -49,6 +47,7 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '^@/(.*)$': '<rootDir>/$1'
   }
 };
