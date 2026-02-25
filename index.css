@@ -2,29 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-in;
+@keyframes fade-in {
+  from {
+    opacity: 0;
   }
-  
-  .animate-fade-in-sm {
-    animation: fadeIn 0.2s ease-in;
+  to {
+    opacity: 1;
   }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+}
+
+@keyframes fade-in-sm {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
   }
-  
-  .glass-panel {
-    background: rgba(22, 27, 34, 0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-fade-in-sm {
+  animation: fade-in-sm 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
 }

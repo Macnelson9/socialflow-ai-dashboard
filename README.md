@@ -6,6 +6,8 @@
 
 **Engineering the future of decentralized creator economies with Gemini AI and Stellar.**
 
+*Last updated: February 24, 2026*
+
 [![Network: Stellar](https://img.shields.io/badge/Blockchain-Stellar-0866FF?style=for-the-badge&logo=stellar)](https://stellar.org)
 [![Intelligence: Gemini](https://img.shields.io/badge/AI-Gemini%20Pro-F9AB00?style=for-the-badge&logo=google-gemini)](https://deepmind.google/technologies/gemini/)
 [![Engine: Electron](https://img.shields.io/badge/Engine-Electron-2B2E3A?style=for-the-badge&logo=electron)](https://www.electronjs.org/)
