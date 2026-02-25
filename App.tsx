@@ -63,6 +63,8 @@ const App: React.FC = () => {
         return <MediaLibrary {...props} />;
       case View.INBOX:
         return <Inbox {...props} />;
+      case View.REWARDS_CONFIG:
+        return <RewardsConfig {...props} />;
       case View.PORTFOLIO:
         return <PortfolioView />;
       case View.TRANSACTION_HISTORY:
