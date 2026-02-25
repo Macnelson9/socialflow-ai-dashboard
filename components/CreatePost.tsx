@@ -180,6 +180,22 @@ export const CreatePost: React.FC<ViewProps> = ({ onNavigate }) => {
     }
   };
 
+  const handlePromotePost = () => {
+    if (!caption && !mediaFile) {
+      alert("Please add some content before promoting.");
+      return;
+    }
+    setIsPromotionModalOpen(true);
+  };
+
+  const handlePaymentComplete = (transaction: PaymentTransaction) => {
+    setPromotionTransaction(transaction);
+    setIsPromoted(true);
+    setIsPromotionModalOpen(false);
+    setSaveStatus('Post promoted successfully!');
+    setTimeout(() => setSaveStatus(''), 3000);
+  };
+
   const handleTopicEdit = () => {
     setTempTopic(topic);
     setIsEditingTopic(true);
@@ -201,6 +217,26 @@ export const CreatePost: React.FC<ViewProps> = ({ onNavigate }) => {
                {saveStatus}
              </div>
            )}
+           {isPromoted && promotionTransaction && (
+             <div className="flex items-center gap-2">
+               <SponsoredBadge tier={promotionTransaction.sponsorshipTier} />
+               <span className="text-xs text-gray-400">
+                 Tx: {promotionTransaction.transactionHash?.slice(0, 8)}...
+               </span>
+             </div>
+           )}
+           <button 
+             onClick={handlePromotePost}
+             disabled={isPromoted}
+             className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-medium transition-all ${
+               isPromoted 
+                 ? 'bg-green-500/20 text-green-400 cursor-not-allowed' 
+                 : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 shadow-lg shadow-purple-500/20'
+             }`}
+           >
+             <MaterialIcon name={isPromoted ? "check_circle" : "campaign"} className="text-base" />
+             {isPromoted ? 'Promoted' : 'Promote Post'}
+           </button>
            <button 
              onClick={handleSaveDraft}
              className="text-gray-subtext hover:text-white text-sm font-medium px-4 py-2"
@@ -523,6 +559,13 @@ export const CreatePost: React.FC<ViewProps> = ({ onNavigate }) => {
           </Card>
         </div>
       </div>
+
+      <PaymentModal
+        isOpen={isPromotionModalOpen}
+        onClose={() => setIsPromotionModalOpen(false)}
+        onPaymentComplete={handlePaymentComplete}
+        postId={`post_${Date.now()}`}
+      />
     </div>
   );
 };

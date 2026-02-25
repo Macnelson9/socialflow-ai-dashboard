@@ -16,6 +16,7 @@ import {
     Legend,
 } from 'recharts';
 import { analyticsService, AggregatedData } from '../services/analyticsService';
+import { PerformanceComparison } from './PerformanceComparison';
 
 const MaterialIcon = ({ name, className }: { name: string; className?: string }) => (
     <span className={`material-symbols-outlined ${className}`}>{name}</span>
@@ -167,93 +168,12 @@ export const AccountPerformance: React.FC<ViewProps> = () => {
                 />
             </div>
 
+            {/* Performance Comparison */}
+            <PerformanceComparison timeRange={timeRange} />
+
             {/* Main Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* 30-Day Balance History */}
-                <Card className="lg:col-span-2">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 className="text-lg font-semibold text-white">Balance History</h3>
-                            <p className="text-sm text-gray-subtext">Wallet value and follower growth over time</p>
-                        </div>
-                    </div>
-                    <div className="h-[320px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={data.performanceHistory}>
-                                <defs>
-                                    <linearGradient id="colorWallet" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
-                                    </linearGradient>
-                                    <linearGradient id="colorFollowers" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                <XAxis
-                                    dataKey="date"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#8892b0', fontSize: 12 }}
-                                    dy={10}
-                                    tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                />
-                                <YAxis
-                                    yAxisId="left"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#8892b0', fontSize: 12 }}
-                                    tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                                />
-                                <YAxis
-                                    yAxisId="right"
-                                    orientation="right"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#8892b0', fontSize: 12 }}
-                                    tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                                />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: '#161b22',
-                                        borderColor: '#334155',
-                                        borderRadius: '12px',
-                                    }}
-                                    formatter={(value: any, name: string) => {
-                                        if (name === 'Wallet Value') return [`$${value.toFixed(2)}`, name];
-                                        if (name === 'Followers') return [value.toLocaleString(), name];
-                                        return [value, name];
-                                    }}
-                                    labelFormatter={(label) => new Date(label).toLocaleDateString()}
-                                />
-                                <Legend />
-                                <Area
-                                    yAxisId="left"
-                                    type="monotone"
-                                    dataKey="walletValue"
-                                    stroke="#14b8a6"
-                                    strokeWidth={3}
-                                    fillOpacity={1}
-                                    fill="url(#colorWallet)"
-                                    name="Wallet Value"
-                                />
-                                <Area
-                                    yAxisId="right"
-                                    type="monotone"
-                                    dataKey="followers"
-                                    stroke="#3b82f6"
-                                    strokeWidth={3}
-                                    fillOpacity={1}
-                                    fill="url(#colorFollowers)"
-                                    name="Followers"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </Card>
-
-                {/* Engagement vs XLM Spent */}
+                {/* Engagement Correlation */}
                 <Card>
                     <h3 className="text-lg font-semibold text-white mb-6">Engagement vs XLM Spent</h3>
                     <div className="h-[320px]">
@@ -317,68 +237,6 @@ export const AccountPerformance: React.FC<ViewProps> = () => {
                     </div>
                 </Card>
             </div>
-
-            {/* Top Posts Performance */}
-            <Card>
-                <h3 className="text-lg font-semibold text-white mb-6">
-                    Top 5 Posts by Engagement & Value
-                </h3>
-                <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data.topPosts}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                            <XAxis
-                                dataKey="platform"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#8892b0', fontSize: 12 }}
-                            />
-                            <YAxis
-                                yAxisId="left"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#8892b0', fontSize: 12 }}
-                                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                            />
-                            <YAxis
-                                yAxisId="right"
-                                orientation="right"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#8892b0', fontSize: 12 }}
-                                tickFormatter={(value) => `$${value}`}
-                            />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: '#161b22',
-                                    borderColor: '#334155',
-                                    borderRadius: '12px',
-                                }}
-                                formatter={(value: any, name: string) => {
-                                    if (name === 'Engagement') return [value.toLocaleString(), name];
-                                    if (name === 'Value') return [`$${value.toFixed(2)}`, name];
-                                    return [value, name];
-                                }}
-                            />
-                            <Legend />
-                            <Bar
-                                yAxisId="left"
-                                dataKey="engagement"
-                                fill="#3b82f6"
-                                radius={[8, 8, 0, 0]}
-                                name="Engagement"
-                            />
-                            <Bar
-                                yAxisId="right"
-                                dataKey="value"
-                                fill="#14b8a6"
-                                radius={[8, 8, 0, 0]}
-                                name="Value"
-                            />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </Card>
 
             {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
