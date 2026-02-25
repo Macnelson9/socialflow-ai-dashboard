@@ -59,3 +59,23 @@ export enum Platform {
   LINKEDIN = 'linkedin',
   X = 'x'
 }
+
+export enum TransactionType {
+  POST = 'post',
+  SCHEDULE = 'schedule',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  REPLY = 'reply'
+}
+
+export interface Transaction {
+  id: string;
+  type: TransactionType;
+  platform: Platform;
+  title: string;
+  description?: string;
+  scheduledTime?: Date;
+  relatedTransactions?: string[];
+  createdAt: Date;
+  data?: any;
+}

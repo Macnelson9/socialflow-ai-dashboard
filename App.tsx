@@ -8,10 +8,56 @@ import { CreatePost } from './components/CreatePost';
 import { MediaLibrary } from './components/MediaLibrary';
 import { Inbox } from './components/Inbox';
 import { Settings } from './components/Settings';
-import { View } from './types';
+import { StagingDock } from './components/dashboard/StagingDock';
+import { View, Transaction, TransactionType, Platform } from './types';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
+  const [transactions, setTransactions] = useState<Transaction[]>([
+    {
+      id: '1',
+      type: TransactionType.POST,
+      platform: Platform.INSTAGRAM,
+      title: 'Summer Collection Launch',
+      description: 'New product line announcement with carousel images',
+      createdAt: new Date(),
+    },
+    {
+      id: '2',
+      type: TransactionType.SCHEDULE,
+      platform: Platform.YOUTUBE,
+      title: 'Tutorial Video Upload',
+      description: 'How to use our new features',
+      scheduledTime: new Date(Date.now() + 86400000),
+      createdAt: new Date(),
+    },
+    {
+      id: '3',
+      type: TransactionType.REPLY,
+      platform: Platform.X,
+      title: 'Customer Support Response',
+      description: 'Reply to @user about product inquiry',
+      relatedTransactions: ['4'],
+      createdAt: new Date(),
+    },
+    {
+      id: '4',
+      type: TransactionType.UPDATE,
+      platform: Platform.FACEBOOK,
+      title: 'Event Details Update',
+      description: 'Update venue information for upcoming event',
+      relatedTransactions: ['3'],
+      createdAt: new Date(),
+    },
+  ]);
+
+  const handleRemoveTransaction = (id: string) => {
+    setTransactions(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleReorderTransactions = (newTransactions: Transaction[]) => {
+    setTransactions(newTransactions);
+  };
 
   const renderView = () => {
     const props = { onNavigate: setCurrentView };
@@ -39,9 +85,15 @@ const App: React.FC = () => {
 
         <Header />
         
-        <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scroll-smooth">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 scroll-smooth pb-20">
           {renderView()}
         </main>
+
+        <StagingDock
+          transactions={transactions}
+          onRemoveTransaction={handleRemoveTransaction}
+          onReorderTransactions={handleReorderTransactions}
+        />
       </div>
     </div>
   );
