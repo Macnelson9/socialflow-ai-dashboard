@@ -7,6 +7,7 @@ import { Calendar } from './components/Calendar';
 import { CreatePost } from './components/CreatePost';
 import { MediaLibrary } from './components/MediaLibrary';
 import { Inbox } from './components/Inbox';
+import { Rewards } from './components/Rewards';
 import { Settings } from './components/Settings';
 import { RewardsDemo } from './components/blockchain/RewardsDemo';
 import BlockchainMonitor from './components/BlockchainMonitor';
