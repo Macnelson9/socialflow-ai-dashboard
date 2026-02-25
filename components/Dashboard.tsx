@@ -76,7 +76,7 @@ const activityData = [
   },
 ];
 
-export const Dashboard: React.FC<ViewProps> = ({ onNavigate }) => {
+export const Dashboard: React.FC<ViewProps> = () => {
   const [timeRange, setTimeRange] = useState('Last 7 Days');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
