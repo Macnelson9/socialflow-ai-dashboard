@@ -7,6 +7,7 @@ import { Calendar } from './components/Calendar';
 import { CreatePost } from './components/CreatePost';
 import { MediaLibrary } from './components/MediaLibrary';
 import { Inbox } from './components/Inbox';
+import { Rewards } from './components/Rewards';
 import { Settings } from './components/Settings';
 import { StagingDock } from './components/dashboard/StagingDock';
 import { View, Transaction, TransactionType, Platform } from './types';
@@ -61,7 +62,7 @@ const App: React.FC = () => {
 
   const renderView = () => {
     const props = { onNavigate: setCurrentView };
-    
+
     switch (currentView) {
       case View.DASHBOARD: return <Dashboard {...props} />;
       case View.ANALYTICS: return <Analytics {...props} />;
@@ -69,8 +70,35 @@ const App: React.FC = () => {
       case View.CREATE_POST: return <CreatePost {...props} />;
       case View.MEDIA_LIBRARY: return <MediaLibrary {...props} />;
       case View.INBOX: return <Inbox {...props} />;
+      case View.REWARDS: return <RewardsDemo />;
       case View.SETTINGS: return <Settings {...props} />;
+      case View.BLOCKCHAIN_MONITOR: return <BlockchainMonitor />;
+      case View.TRANSACTION_HISTORY: return <TransactionHistory />;
       default: return <Dashboard {...props} />;
+      case View.DASHBOARD:
+        return <Dashboard {...props} />;
+      case View.ANALYTICS:
+        return <Analytics {...props} />;
+      case View.CALENDAR:
+        return <Calendar {...props} />;
+      case View.CREATE_POST:
+        return <CreatePost {...props} />;
+      case View.MEDIA_LIBRARY:
+        return <MediaLibrary {...props} />;
+      case View.INBOX:
+        return <Inbox {...props} />;
+      case View.REWARDS_CONFIG:
+        return <RewardsConfig {...props} />;
+      case View.PORTFOLIO:
+        return <PortfolioView />;
+      case View.TRANSACTION_HISTORY:
+        return <TransactionHistory {...props} />;
+      case View.ACCOUNT_PERFORMANCE:
+        return <AccountPerformance {...props} />;
+      case View.SETTINGS:
+        return <Settings {...props} />;
+      default:
+        return <Dashboard {...props} />;
     }
   };
 
@@ -95,7 +123,7 @@ const App: React.FC = () => {
           onReorderTransactions={handleReorderTransactions}
         />
       </div>
-    </div>
+    </ToastProvider>
   );
 };
 
