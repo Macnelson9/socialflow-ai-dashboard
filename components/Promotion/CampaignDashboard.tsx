@@ -17,6 +17,8 @@ type Props = {
   promotions: Promotion[];
 };
 
+type Class = {};
+
 export const CampaignDashboard: React.FC<Props> = ({ promotions }) => {
   return (
     <div className="space-y-8">
