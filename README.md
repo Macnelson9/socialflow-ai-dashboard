@@ -12,6 +12,7 @@
 [![Intelligence: Gemini](https://img.shields.io/badge/AI-Gemini%20Pro-F9AB00?style=for-the-badge&logo=google-gemini)](https://deepmind.google/technologies/gemini/)
 [![Engine: Electron](https://img.shields.io/badge/Engine-Electron-2B2E3A?style=for-the-badge&logo=electron)](https://www.electronjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success?style=for-the-badge)](LICENSE)
+[![Coverage](https://img.shields.io/badge/Coverage-See%20Report-blue?style=for-the-badge)](COVERAGE.md)
 
 [Exploration Guide](#-exploration-guide) • [Architecture](#-system-architecture) • [Roadmap](#-strategic-roadmap) • [Contributors](#-developer-ecosystem)
 
