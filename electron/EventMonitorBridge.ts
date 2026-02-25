@@ -1,8 +1,10 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { EventMonitorService, BlockchainEvent, BlockchainEventType } from '../blockchain/services/EventMonitorService';
+import { EventMonitorService, BlockchainEvent, BlockchainEventType } from '../src/blockchain/services/EventMonitorService';
+import { NotificationService } from './NotificationService';
 
 export class EventMonitorBridge {
   private eventMonitor: EventMonitorService;
+  private notificationService: NotificationService;
   private mainWindow: BrowserWindow | null = null;
   private eventBatch: BlockchainEvent[] = [];
   private batchInterval: NodeJS.Timeout | null = null;
@@ -11,6 +13,7 @@ export class EventMonitorBridge {
 
   constructor(horizonUrl?: string) {
     this.eventMonitor = new EventMonitorService(horizonUrl);
+    this.notificationService = new NotificationService();
     this.setupIpcHandlers();
   }
 
@@ -39,6 +42,24 @@ export class EventMonitorBridge {
         return { success: false, error: (error as Error).message };
       }
     });
+
+    ipcMain.handle('notifications:get-preferences', () => {
+      return this.notificationService.getPreferences();
+    });
+
+    ipcMain.handle('notifications:set-preferences', (_, prefs) => {
+      this.notificationService.setPreferences(prefs);
+      return { success: true };
+    });
+
+    ipcMain.handle('notifications:get-history', () => {
+      return this.notificationService.getHistory();
+    });
+
+    ipcMain.handle('notifications:clear-history', () => {
+      this.notificationService.clearHistory();
+      return { success: true };
+    });
   }
 
   private setupEventListeners(): void {
@@ -51,6 +72,7 @@ export class EventMonitorBridge {
 
   private addEventToBatch(event: BlockchainEvent): void {
     this.eventBatch.push(event);
+    this.notificationService.notify(event);
 
     if (this.eventBatch.length >= this.batchSize) {
       this.flushBatch();
@@ -91,5 +113,9 @@ export class EventMonitorBridge {
     this.stopBatching();
     ipcMain.removeHandler('blockchain:start-monitoring');
     ipcMain.removeHandler('blockchain:stop-monitoring');
+    ipcMain.removeHandler('notifications:get-preferences');
+    ipcMain.removeHandler('notifications:set-preferences');
+    ipcMain.removeHandler('notifications:get-history');
+    ipcMain.removeHandler('notifications:clear-history');
   }
 }

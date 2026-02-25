@@ -1,4 +1,7 @@
-import { Horizon, ServerApi } from '@stellar/stellar-sdk';
+import * as StellarSdk from '@stellar/stellar-sdk';
+
+const Horizon = StellarSdk.Horizon;
+type ServerApi = typeof StellarSdk.Horizon.HorizonApi;
 
 export enum BlockchainEventType {
   PAYMENT = 'payment',
@@ -63,7 +66,7 @@ export class EventMonitorService {
   }
 
   private handlePayment(
-    payment: ServerApi.PaymentOperationRecord,
+    payment: any,
     accountId: string
   ): void {
     const event: BlockchainEvent = {
@@ -83,7 +86,7 @@ export class EventMonitorService {
   }
 
   private handleOperation(
-    operation: ServerApi.OperationRecord,
+    operation: any,
     accountId: string
   ): void {
     const eventType = this.detectEventType(operation);
@@ -100,7 +103,7 @@ export class EventMonitorService {
     this.emit(eventType, event);
   }
 
-  private detectEventType(operation: ServerApi.OperationRecord): BlockchainEventType | null {
+  private detectEventType(operation: any): BlockchainEventType | null {
     switch (operation.type) {
       case 'payment':
         return BlockchainEventType.PAYMENT;
@@ -125,7 +128,7 @@ export class EventMonitorService {
     }
   }
 
-  private extractOperationData(operation: ServerApi.OperationRecord): any {
+  private extractOperationData(operation: any): any {
     const baseData = {
       type: operation.type,
       transactionHash: operation.transaction_hash,
@@ -133,7 +136,7 @@ export class EventMonitorService {
 
     switch (operation.type) {
       case 'payment':
-        const payment = operation as ServerApi.PaymentOperationRecord;
+        const payment = operation as any;
         return {
           ...baseData,
           from: payment.from,
