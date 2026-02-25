@@ -5,7 +5,8 @@ export enum View {
   CREATE_POST = 'CREATE_POST',
   MEDIA_LIBRARY = 'MEDIA_LIBRARY',
   INBOX = 'INBOX',
-  SETTINGS = 'SETTINGS'
+  SETTINGS = 'SETTINGS',
+  REWARDS = 'REWARDS'
 }
 
 export interface NavItem {
@@ -59,3 +60,23 @@ export enum Platform {
   LINKEDIN = 'linkedin',
   X = 'x'
 }
+
+export interface RewardNotification {
+  id: string;
+  userId: string;
+  amount: number;
+  reason: string;
+  timestamp: Date;
+  read: boolean;
+}
+
+export interface LeaderboardEntry {
+  userId: string;
+  username: string;
+  avatar: string;
+  totalRewards: number;
+  engagementCount: number;
+  rank: number;
+}
+
+export type TimePeriod = 'daily' | 'weekly' | 'all-time';
