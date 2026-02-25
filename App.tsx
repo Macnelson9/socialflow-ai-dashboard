@@ -11,6 +11,7 @@ import { Settings } from "./components/Settings";
 import { PortfolioView } from "./components/blockchain/PortfolioView";
 import { TransactionHistory } from "./components/blockchain/TransactionHistory";
 import { AccountPerformance } from "./components/AccountPerformance";
+import { RewardsConfig } from "./components/RewardsConfig";
 import { View } from "./types";
 
 const App: React.FC = () => {
@@ -32,6 +33,8 @@ const App: React.FC = () => {
         return <MediaLibrary {...props} />;
       case View.INBOX:
         return <Inbox {...props} />;
+      case View.REWARDS_CONFIG:
+        return <RewardsConfig {...props} />;
       case View.PORTFOLIO:
         return <PortfolioView />;
       case View.TRANSACTION_HISTORY:

@@ -43,6 +43,11 @@ const navItems: NavItem[] = [
   },
   { id: View.INBOX, label: "Inbox", icon: <MaterialIcon name="inbox" /> },
   {
+    id: View.REWARDS_CONFIG,
+    label: "Rewards",
+    icon: <MaterialIcon name="emoji_events" />,
+  },
+  {
     id: View.PORTFOLIO,
     label: "Portfolio",
     icon: <MaterialIcon name="account_balance_wallet" />,
