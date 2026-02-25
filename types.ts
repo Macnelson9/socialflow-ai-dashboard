@@ -71,30 +71,30 @@ export interface Conversation {
 }
 
 export enum Platform {
-  INSTAGRAM = "instagram",
-  TIKTOK = "tiktok",
-  FACEBOOK = "facebook",
-  YOUTUBE = "youtube",
-  LINKEDIN = "linkedin",
-  X = "x",
+  INSTAGRAM = 'instagram',
+  TIKTOK = 'tiktok',
+  FACEBOOK = 'facebook',
+  YOUTUBE = 'youtube',
+  LINKEDIN = 'linkedin',
+  X = 'x'
 }
 
-export interface BlockchainAsset {
-  code: string;
-  issuer: string;
-  balance: string;
-  limit?: string;
-  value?: number;
-  price?: number;
+export enum TransactionType {
+  POST = 'post',
+  SCHEDULE = 'schedule',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  REPLY = 'reply'
 }
 
-export interface PortfolioSummary {
-  totalValue: number;
-  assets: BlockchainAsset[];
-  currency: string;
-  lastUpdated: Date;
+export interface Transaction {
+  id: string;
+  type: TransactionType;
+  platform: Platform;
+  title: string;
+  description?: string;
+  scheduledTime?: Date;
+  relatedTransactions?: string[];
+  createdAt: Date;
+  data?: any;
 }
-
-export type AssetFilter = "all" | "tokens" | "nfts" | "zero_balance";
-export type AssetSort = "name" | "balance" | "value";
-export type SortDirection = "asc" | "desc";
