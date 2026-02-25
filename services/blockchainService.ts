@@ -1,4 +1,6 @@
 import Dexie, { Table } from 'dexie';
+import { horizonPool } from './horizonConnectionPool';
+import { cacheLayer } from './cacheLayer';
 
 export interface Transaction {
   id?: number;
@@ -23,54 +25,40 @@ export class TransactionDatabase extends Dexie {
 
 export const db = new TransactionDatabase();
 
-// Horizon API endpoint (Stellar testnet)
-const HORIZON_URL = 'https://horizon-testnet.stellar.org';
-
-// Fetch transactions from Horizon API
+// Fetch transactions from Horizon API with caching
 export async function fetchTransactionsFromHorizon(address: string, limit: number = 20): Promise<Transaction[]> {
+  // Check cache first
+  const cacheKey = `${address}:${limit}`;
+  const cached = cacheLayer.getTxHistory(cacheKey);
+  if (cached) return cached;
+
   try {
-    const response = await fetch(
-      `${HORIZON_URL}/accounts/${address}/transactions?limit=${limit}&order=desc`
-    );
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch transactions from Horizon');
-    }
+    const transactions = await horizonPool.execute(async (server) => {
+      const txResponse = await server.transactions()
+        .forAccount(address)
+        .limit(limit)
+        .order('desc')
+        .call();
 
-    const data = await response.json();
-    
-    return data.records.map((tx: any) => {
-      // Determine transaction type
-      let type: 'payment' | 'mint' | 'other' = 'other';
-      let amount = '0';
-      let asset = 'XLM';
-      
-      // Check operation types
-      if (tx.operation_count > 0 && tx.operations) {
-        const ops = tx.operations.records;
-        if (ops.length > 0) {
-          const op = ops[0];
-          if (op.type === 'payment') {
-            type = 'payment';
-            amount = op.amount || '0';
-            asset = op.asset_code || 'XLM';
-          } else if (op.type === 'create_token' || op.type === 'clawback' || op.type === 'mint_liquidity') {
-            type = 'mint';
-            amount = op.amount || '0';
-            asset = op.asset_code || 'XLM';
-          }
-        }
-      }
+      return txResponse.records.map((tx: any) => {
+        let type: 'payment' | 'mint' | 'other' = 'other';
+        let amount = '0';
+        let asset = 'XLM';
 
-      return {
-        hash: tx.id,
-        type,
-        amount,
-        asset,
-        timestamp: tx.created_at,
-        status: tx.successful ? 'success' : 'failed' as 'success' | 'pending' | 'failed'
-      };
+        return {
+          hash: tx.id,
+          type,
+          amount,
+          asset,
+          timestamp: tx.created_at,
+          status: tx.successful ? 'success' : 'failed' as 'success' | 'pending' | 'failed'
+        };
+      });
     });
+
+    // Cache the result
+    cacheLayer.setTxHistory(cacheKey, transactions);
+    return transactions;
   } catch (error) {
     console.error('Error fetching transactions from Horizon:', error);
     return [];
