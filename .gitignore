@@ -26,3 +26,7 @@ release
 # Project Tracking
 tasks.md
 task.md
+# Test coverage
+coverage
+.nyc_output
+*.lcov

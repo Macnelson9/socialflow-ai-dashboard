@@ -12,7 +12,9 @@
     "electron:dev": "concurrently \"npm run dev\" \"npx wait-on tcp:5173 && npx electron .\"",
     "electron:build": "npx vite build && electron-builder",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:coverage:report": "jest --coverage && node scripts/generate-badge.js",
+    "test:ci": "jest --coverage --ci --maxWorkers=2"
   },
   "keywords": [],
   "author": "",
